@@ -1,0 +1,19 @@
+{
+    "name"        : "XML::XPath",
+    "version"     : "0.0.1",
+    "perl"        : "6.c",
+    "description" : "XPath perl6 library",
+    "depends"     : [ "XML" ],
+    "provides" : {
+        "XML::XPath"                                : "lib/XML/XPath.pm6",
+        "XML::XPath::Grammar"                       : "lib/XML/XPath/Grammar.pm6",
+    },
+    "authors" : [
+        "Martin Barth (ufobat)"
+    ],
+    "support" : {
+        "bugtracker" : "https://github.com/ufobat/p6-XML-XPath/issues",
+        "source" : "git://github.com/ufobat/p6-XML-XPath.git"
+    },
+    "source-url"  : "git://github.com/ufobat/p6-XML-XPath.git"
+}
