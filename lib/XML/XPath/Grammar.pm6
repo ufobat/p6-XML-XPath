@@ -1,5 +1,5 @@
 use v6.c;
-use Grammar::Debugger;
+#use Grammar::Debugger;
 
 grammar XML::XPath::Grammar {
     token TOP { <Expr> }
@@ -29,7 +29,7 @@ grammar XML::XPath::Grammar {
     #}
     # rewrite wihtout infinite loop
     token RelativeLocationPath {
-        <Step> [ ['/' | '//'] <Step> ]*
+        <Step>+  %  ['/' | '//']
     }
 
     # [4]
@@ -38,10 +38,12 @@ grammar XML::XPath::Grammar {
         | <AbbreviatedStep>
     }
 
+    # [13}
+    # token AbbreviatedAxisSpecifier { '@'? }
     # [5]
     token AxisSpecifier {
         <AxisName> '::'
-        | <AbbreviatedAxisSpecifier>
+        | '@'?
     }
 
     # [6]
@@ -83,9 +85,6 @@ grammar XML::XPath::Grammar {
     # [12]
     token AbbreviatedStep { '.' | '..' }
 
-    # [13}
-    token AbbreviatedAxisSpecifier { '@'? }
-
     # [14]
     token Expr   { <OrExpr> }
 
@@ -100,130 +99,99 @@ grammar XML::XPath::Grammar {
 
     # [16]
     token FunctionCall {
-        <FunctionName>
-        '('
-        [ <Argument> [ ',' <Argument> ]* ]?
-        ')'
+        <FunctionName> '(' [ <Argument>+ % ',' ] ')'
     }
 
     # [17]
     token Argument { <Expr> }
 
     # [18]
-    token UnionExpr {
-        <PathExpr>
-        | <UnionExpr> '|' <PathExpr>
-    }
+    token UnionExpr { <PathExpr>+ % '|' }
 
     # [19]
     token PathExpr {
-        <LocationPath>
-        | <FilterExpr>
-        | <FilterExpr> '/'  <RelativeLocationPath>
-        | <FilterExpr> '//' <RelativeLocationPath>
+        <FilterExpr> [ [ '//' | '/' ] <RelativeLocationPath> ]?
+        | <LocationPath>
     }
 
     # [20]
     token FilterExpr {
-        <PrimaryExpr>
-        | <FilterExpr> <Predicate>
+        <PrimaryExpr> <Predicate>*
     }
 
     # [21]
-    token OrExpr {
-        <AndExpr>
-        | <OrExpr> 'or' <AndExpr>
-    }
+    token OrExpr { <AndExpr>+ % 'or' }
 
     # [22]
-    token AndExpr {
-        <EqualityExpr>
-        | <AndExpr> 'and' <EqualityExpr>
-    }
+    token AndExpr { <EqualityExpr>+ % 'and' }
 
     # [23]
     token EqualityExpr {
-        <RelationalExpr>
-        | <EqualityExpr> '='  <RelationalExpr>
-        | <EqualityExpr> '!=' <RelationalExpr>
+        <RelationalExpr>+ % ['=' || '!=' ]
     }
 
     # [24]
     token RelationalExpr {
-        <AdditiveExpr>
-        | <RelationalExpr> '<'  <AdditiveExpr>
-        | <RelationalExpr> '>'  <AdditiveExpr>
-        | <RelationalExpr> '<=' <AdditiveExpr>
-        | <RelationalExpr> '>=' <AdditiveExpr>
+        <AdditiveExpr>+ % [ [ '<' | '>' ] '='? ]
     }
 
     # [25]
     token AdditiveExpr {
-        <MultiplicativeExpr>
-        | <AdditiveExpr> '+' <MultiplicativeExpr>
-        | <AdditiveExpr> '-' <MultiplicativeExpr>
+        <MultiplicativeExpr>+ % [ '+' | '.']
     }
 
+    # [34]
+    # token MultiplyOperator { '*' }
     # [26]
     token MultiplicativeExpr {
-        <UnaryExpr>
-        | <MultiplicativeExpr> <MultiplyOperator> <UnaryExpr>
-        | <MultiplicativeExpr> 'div' <UnaryExpr>
-        | <MultiplicativeExpr> 'mod' <UnaryExpr>
+        <UnaryExpr>+ % ['*' | 'div' | 'mod' ]
     }
 
     # [27]
     token UnaryExpr {
-        <UnionExpr>
-        | '-' <UnaryExpr>
+        '-'* <UnionExpr>
     }
 
-    # [28]
-    token ExprToken {
-        <.ws>?
-        [
-            '(' | ')' | '[' | ']' | '.' | '..' | '@' | ',' | '::'
-            | <NameTest>
-            | <NodeType>
-            | <Operator>
-            | <FunctionName>
-            | <AxisName>
-            | <Literal>
-            | <Number>
-            | <VariableReference>
-        ]
-        <.ws>?
-    }
+    ## [28]
+    #token ExprToken {
+    #    <.ws>?
+    #    [
+    #        '(' | ')' | '[' | ']' | '.' | '..' | '@' | ',' | '::'
+    #        | <NameTest>
+    #        | <NodeType>
+    #        | <Operator>
+    #        | <FunctionName>
+    #        | <AxisName>
+    #        | <Literal>
+    #        | <Number>
+    #        | <VariableReference>
+    #    ]
+    #    <.ws>?
+    #}
 
     # [29]
     token Literal {
         '"'   <-[ " ]>* '"'
         | "'" <-[ ' ]>* "'"
     }
-
+    #'
     # [30]
-    token Number {
-        <Digits> [ '.' <Digits>?]?
-        | '.' <Digits>
-    }
-
     # [31]
-    token Digits {
-        \d+
+    token Number {
+        \d+ [ '.' \d *]?
+        | '.' \d+
     }
 
     # [32]
-    token Operator {
-        <OperatorName>
-        | <MultipyOperator>
-        | '/' | '//' | '|' | '+' | '-' | '=' | '!=' | '<' | '<=' | '>' | '>='
-    }
+    # token Operator {
+    #     <OperatorName>
+    #     | <MultiplyOperator>
+    #     | '/' | '//' | '|' | '+' | '-' | '=' | '!=' | '<' | '<=' | '>' | '>='
+    # }
 
     # [33]
-    token OperatorName { 'and' | 'or' | 'mod' | 'div' }
+    # token OperatorName { 'and' | 'or' | 'mod' | 'div' }
 
-    # [34]
-    token MultiplyOperator { '*' }
 
     # [35]
     token FunctionName {
@@ -268,11 +236,13 @@ grammar XML::XPath::Grammar {
 
     # [11]
     token LocalPart { <NCName> }
-    #h ttps://www.w3.org/TR/REC-xml-names/#NT-NCName
+
+    # https://www.w3.org/TR/REC-xml-names/#NT-NCName
     # [4]
+    # Name wihtout :
     token NCName {
         # https://www.w3.org/TR/REC-xml/#NT-Name
-        <[\w] - [:]>+
+        <:L> <[\w] - [:]>*
     }
 
 }
