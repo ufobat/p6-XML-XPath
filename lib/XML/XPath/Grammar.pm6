@@ -106,7 +106,8 @@ grammar XML::XPath::Grammar {
     token Argument { <Expr> }
 
     # [18]
-    token UnionExpr { <PathExpr>+ % '|' }
+    token UnionExpr { <PathExpr>+ % <UnionOperator> }
+    token UnionOperator { '|' }
 
     # [19]
     token PathExpr {
@@ -120,7 +121,7 @@ grammar XML::XPath::Grammar {
     }
 
     # [21]
-    token OrEpxr { <AndExpr>+ % <OrOperator> }
+    token OrExpr { <AndExpr>+ % <OrOperator> }
     token OrOperator { 'or' }
 
     # [22]
@@ -132,26 +133,21 @@ grammar XML::XPath::Grammar {
     token EqualityOperator { ['=' || '!=' ] }
 
     # [24]
-    token RelationalExpr {
-        <AdditiveExpr>+ % [ [ '<' | '>' ] '='? ]
-    }
+    token RelationalExpr { <AdditiveExpr>+ % <RelationalOperator> }
+    token RelationalOperator { [ [ '<' | '>' ] '='? ] }
 
     # [25]
-    token AdditiveExpr {
-        <MultiplicativeExpr>+ % [ '+' | '-']
-    }
+    token AdditiveExpr { <MultiplicativeExpr>+ % <AdditiveOperators> }
+    token AdditiveOperators { [ '+' | '-'] }
 
     # [34]
-    # token MultiplyOperator { '*' }
     # [26]
-    token MultiplicativeExpr {
-        <UnaryExpr>+ % ['*' | 'div' | 'mod' ]
-    }
+    token MultiplicativeExpr { <UnaryExpr>+ % <MultiplicativeOperator> }
+    token MultiplicativeOperator { ['*' | 'div' | 'mod' ] }
 
     # [27]
-    token UnaryExpr {
-        '-'* <UnionExpr>
-    }
+    token UnaryExpr { <UnaryOperator> <UnionExpr> }
+    token UnaryOperator { '-'* }
 
     # [29]
     token Literal {
