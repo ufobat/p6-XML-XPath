@@ -137,7 +137,7 @@ grammar XML::XPath::Grammar {
 
     # [25]
     token AdditiveExpr {
-        <MultiplicativeExpr>+ % [ '+' | '.']
+        <MultiplicativeExpr>+ % [ '+' | '-']
     }
 
     # [34]
@@ -152,23 +152,6 @@ grammar XML::XPath::Grammar {
         '-'* <UnionExpr>
     }
 
-    ## [28]
-    #token ExprToken {
-    #    <.ws>?
-    #    [
-    #        '(' | ')' | '[' | ']' | '.' | '..' | '@' | ',' | '::'
-    #        | <NameTest>
-    #        | <NodeType>
-    #        | <Operator>
-    #        | <FunctionName>
-    #        | <AxisName>
-    #        | <Literal>
-    #        | <Number>
-    #        | <VariableReference>
-    #    ]
-    #    <.ws>?
-    #}
-
     # [29]
     token Literal {
         '"'   <-[ " ]>* '"'
@@ -181,17 +164,6 @@ grammar XML::XPath::Grammar {
         \d+ [ '.' \d *]?
         | '.' \d+
     }
-
-    # [32]
-    # token Operator {
-    #     <OperatorName>
-    #     | <MultiplyOperator>
-    #     | '/' | '//' | '|' | '+' | '-' | '=' | '!=' | '<' | '<=' | '>' | '>='
-    # }
-
-    # [33]
-    # token OperatorName { 'and' | 'or' | 'mod' | 'div' }
-
 
     # [35]
     token FunctionName {
@@ -239,7 +211,10 @@ grammar XML::XPath::Grammar {
 
     # https://www.w3.org/TR/REC-xml-names/#NT-NCName
     # [4]
-    # Name wihtout :
+    # TODO
+    # [4]   	NameStartChar	   ::=   	":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
+    # [4a]   	NameChar	   ::=   	NameStartChar | "-" | "." | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
+    # [5]   	Name	   ::=   	NameStartChar (NameChar)*ken NCName {
     token NCName {
         # https://www.w3.org/TR/REC-xml/#NT-Name
         <:L> <[\w] - [:]>*
