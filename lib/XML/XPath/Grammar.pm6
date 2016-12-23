@@ -120,15 +120,16 @@ grammar XML::XPath::Grammar {
     }
 
     # [21]
-    token OrExpr { <AndExpr>+ % 'or' }
+    token OrEpxr { <AndExpr>+ % <OrOperator> }
+    token OrOperator { 'or' }
 
     # [22]
-    token AndExpr { <EqualityExpr>+ % 'and' }
+    token AndExpr { <EqualityExpr>+ % <AndOperator> }
+    token AndOperator { 'and' }
 
     # [23]
-    token EqualityExpr {
-        <RelationalExpr>+ % ['=' || '!=' ]
-    }
+    token EqualityExpr { <RelationalExpr>+ % <EqualityOperator> }
+    token EqualityOperator { ['=' || '!=' ] }
 
     # [24]
     token RelationalExpr {

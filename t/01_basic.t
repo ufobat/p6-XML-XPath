@@ -22,8 +22,9 @@ my $x = XML::XPath.new(xml => q:to/ENDXML/);
 </AAA>
 ENDXML
 
-my @aaa = $x.findnodes("/AAA");
+my @aaa = $x.find("/AAA");
 
 is @aaa.elems, 1 , 'found one AAA';
+say @aaa;
 
 done-testing;
