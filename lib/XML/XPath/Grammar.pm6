@@ -38,32 +38,28 @@ grammar XML::XPath::Grammar {
         | <AbbreviatedStep>
     }
 
-    # [13}
-    # token AbbreviatedAxisSpecifier { '@'? }
+    # [13]
     # [5]
-    token AxisSpecifier {
-        <AxisName> '::'
-        | '@'?
-    }
-
     # [6]
-    token AxisName {
-        'ancestor'
-        | 'ancestor-or-self'
-        | 'attribute'
-        | 'child'
-        | 'descendant'
-        | 'descendant-or-self'
-        | 'following'
-        | 'following-sibling'
-        | 'namespace'
-        | 'parent'
-        | 'preceding'
-        | 'preceding-sibling'
-        | 'self'
+    token AxisSpecifier {
+        'ancestor::'
+        | 'ancestor-or-self::'
+        | 'attribute::'
+        | 'child::'
+        | 'descendant::'
+        | 'descendant-or-self::'
+        | 'following::'
+        | 'following-sibling::'
+        | 'namespace::'
+        | 'parent::'
+        | 'preceding::'
+        | 'preceding-sibling::'
+        | 'self::'
+        | '@'
+        | ''
     }
 
-    # [7]
+    # [7]s
     token NodeTest {
         <NameTest>
         | <NodeType> '()'
