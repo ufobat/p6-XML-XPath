@@ -3,9 +3,21 @@ use XML::XPath::Expr;
 use XML::XPath::Step;
 
 class XML::XPath::Actions {
-    method Expr($/) {
-        $/.make: $/<OrExpr>.made;
+    my sub mymake($/, $made, Int :$level = 1) {
+        my $caller = callframe($level);
+        my Str $gist = $made.gist;
+        say "called make from { $caller.code.gist } setting it to: " ~ ($gist.chars > 30 ?? "\n    $gist" !! $gist);
+        $/.make: $made;
     }
+
+    method TOP($/) {
+        mymake($/, $/<Expr>.made);
+    }
+
+    method Expr($/) {
+        mymake($/, $/<OrExpr>.made);
+    }
+
     method OrExpr($/) {
         my @tokens = $/<AndExpr>;
         my @operators = $/<OrOperator>;
@@ -42,15 +54,6 @@ class XML::XPath::Actions {
         self!expression(@tokens, $/, @operators);
     }
 
-    method UnaryExpr($/) {
-        my $union-expression = $/<UnionExpr>;
-        my $operator-prefix = $/<UnaryOperator>;
-        my $expr = XML::XPath::Expr.new(
-            expression => $union-expression.made,
-            operator   => $operator-prefix,
-        );
-    }
-
     method UnionExpr($/) {
         my @tokens = $/<PathExpr>;
         my @operators = $/<UnionOperator>;
@@ -62,14 +65,23 @@ class XML::XPath::Actions {
         my $last_expression;
         for @tokens.kv -> $i, $token {
             my $expression = $token.made;
-            my $expr = XML::XPath::Expr.new(:$expression);
             if ($last_expression) {
                 $last_expression.operator(@operators[$i-1].made);
-                $last_expression.next($expr);
+                $last_expression.next($expression);
             }
             $last_expression = $expression;
         }
-        $/.make: $last_expression;
+        mymake($/, $last_expression, level => 2);
+    }
+
+    method UnaryExpr($/) {
+        my $union-expression = $/<UnionExpr>;
+        my $operator-prefix = $/<UnaryOperator>;
+        my $expr = XML::XPath::Expr.new(
+            expression => $union-expression.made,
+            operator   => $operator-prefix,
+        );
+        mymake($/, $expr);
     }
 
     method FilterExpr($/) {
@@ -77,7 +89,7 @@ class XML::XPath::Actions {
         my @predicates   = $/<Predicate>;
         my $expr         = $primary-expr.made;
         $expr.predicates = @predicates>>.made;
-        $/.make: $expr;
+        mymake($/, $expr);
     }
 
     method PrimaryExpr($/) {
@@ -85,10 +97,29 @@ class XML::XPath::Actions {
     }
 
     method RelativeLocationPath($/) {
-        X::NYI.new(feature => 'RelativeLocationPath').throw;
+        my @tokens = $/<Step>;
+        my @operators = $/<StepOperator>;
+        die 'at least 1 *Expr required' if @tokens.elems < 1;
+        my $last_expression;
+        for @tokens.kv -> $i, $token {
+            my $expression = $token.made;
+            my $expr = XML::XPath::Expr.new(:$expression);
+            if ($last_expression) {
+                $last_expression.operator(@operators[$i-1].made);
+                $last_expression.next($expr);
+            }
+            $last_expression = $expression;
+        }
+        mymake($/, $last_expression);
     }
     method LocationPath($/) {
-        X::NYI.new(feature => 'LocationPath').throw;
+        my $path;
+        if $/<RelativeLocationPath>:exists {
+            $path = $/<RelativeLocationPath>.made;
+        } else {
+            $path = $/<AbsoluteLocationPath>.made;
+        }
+        mymake($/, $path);
     }
     method Step($/) {
         my $step;
@@ -101,9 +132,10 @@ class XML::XPath::Actions {
         }
         else {
             if $/<AxisSpecifier> eq '' {
+                my $literal = $/<NodeTest>.made;
                 $step = XML::XPath::Step.new(
                     axis => 'child',
-                    literal => $<NodeTest>.made,
+                    literal => $literal,
                 );
             } elsif $/<AxisSpecifier> eq '@' {
                 $step = XML::XPath::Step.new(
@@ -120,11 +152,11 @@ class XML::XPath::Actions {
         }
         my @predicates   = $/<Predicate>;
         $step.predicates = @predicates>>.made;
-        $/.make: $step;
+        mymake($/, $step);
     }
     method NodeTest($/) {
         if $/<NameTest>:exists {
-            $/.make: ~ $/<NameTest>;
+            mymake($/, ~ $/<NameTest>);
         }
         elsif $/<NodeType>:exists {
             X::NYI.new(feature => 'NodeTest').throw;
@@ -135,15 +167,18 @@ class XML::XPath::Actions {
         }
     }
     method Predicate($/) {
-        $/.make: $/<PredicateExpr>.made;
+        mymake($/, $/<PredicateExpr>.made);
     }
     method PredicateExpr($/) {
-        $/.make: $/<Expr>.made;
+        mymake($/, $/<Expr>.made);
     }
     method AbbreviatedStep($/) {
         X::NYI.new(feature => 'AbbreviatedStep').throw;
     }
     method AxisSpecifier($/) {
-        $/.make: ~$/;
+        mymake($/, ~$/);
+    }
+    method AbsoluteLocationPath($/) {
+        X::NYI.new(feature => 'AbsoluteLocationPath').throw;
     }
 }

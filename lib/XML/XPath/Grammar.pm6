@@ -29,8 +29,9 @@ grammar XML::XPath::Grammar {
     #}
     # rewrite wihtout infinite loop
     token RelativeLocationPath {
-        <Step>+  %  ['/' | '//']
+        <Step>+  % <StepOperator>
     }
+    token StepOperator { ['/' | '//'] }
 
     # [4]
     token Step {
