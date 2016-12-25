@@ -5,12 +5,15 @@ use Data::Dump;
 
 class XML::XPath::Actions {
     my sub mymake($/, $made, Int :$level = 1) {
+        my $debug = 0;
         my $caller = callframe($level);
-        my Str $dump = $made.gist.chars > 30
-        ?? "\n" ~ Dump($made, :skip-methods(True))
-        !! $made.gist;
+        if $debug {
+            my Str $dump = $made.gist.chars > 30
+            ?? "\n" ~ Dump($made, :skip-methods(True))
+            !! $made.gist;
 
-        say "called make from { $caller.code.gist } setting it to: $dump";
+            say "called make from { $caller.code.gist } setting it to: $dump";
+        }
         $/.make: $made;
     }
 
@@ -105,8 +108,9 @@ class XML::XPath::Actions {
 
         my $step;
         if $/<RelativeLocationPath>:exists {
-            $step = $/<RelativeLocationPath>.made;
+            $step          = $/<RelativeLocationPath>.made;
             $step.operator = $operator;
+            $step.axis     = 'self';
         } else {
             $step = XML::XPath::Step.new(:$operator);
         }
@@ -121,8 +125,8 @@ class XML::XPath::Actions {
             my $expression = $token.made;
             my $expr = XML::XPath::Step.new(:$expression);
             if ($last_expression) {
-                $last_expression.operator(@operators[$i-1].made);
-                $last_expression.next($expr);
+                $last_expression.operator = @operators[$i-1].made;
+                $last_expression.next     = $expr;
             }
             $last_expression = $expression;
         }
