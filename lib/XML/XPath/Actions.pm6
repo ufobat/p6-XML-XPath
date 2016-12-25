@@ -74,7 +74,7 @@ class XML::XPath::Actions {
             my $expression = $token.made;
             if ($last_expression) {
                 $last_expression.operator = @operators[$i-1].made;
-                $last_expression.next = $expression;
+                $last_expression.next     = $expression;
             }
             $last_expression = $expression;
         }

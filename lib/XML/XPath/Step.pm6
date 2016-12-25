@@ -18,18 +18,22 @@ class XML::XPath::Step is XML::XPath::Expr {
     has Str $.literal;
 
     method evaluate(XML::XPath::NodeSet $set) {
+        my $result = XML::XPath::NodeSet.new;
         if $.expression and $.operator {
             # in Step the $.operator belongs to $.expression
             X::NYI.new(feature => 'Step Evaluation for expression and operator').throw;
         } elsif $.axis and $.literal {
-            my $result = XML::XPath::NodeSet.new;
             for $set.nodes -> $element {
                 self!evaluate-element($element, $result);
             }
-            return $result;
         } else {
             die 'this should never happen';
         }
+        if $.next {
+            $result = $.next.evaluate($result);
+        }
+
+        return $result;
     }
 
     method !evaluate-element(XML::Element $element, XML::XPath::NodeSet $result) {
@@ -41,10 +45,15 @@ class XML::XPath::Step is XML::XPath::Expr {
                     die "elementname: { $element.name } literal: {$.literal} did not match";
                 }
             }
-            #when 'child' {
-            #}
+            when 'child' {
+                for $element.nodes -> $child {
+                    if $child ~~ XML::Element {
+                        $result.add($child) if $child.name eq $.literal;
+                    }
+                }
+            }
             default {
-                X::NYI.new(feature => "axis $_ not implemented").throw;
+                X::NYI.new(feature => "axis $_").throw;
             }
         }
 
