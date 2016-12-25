@@ -4,7 +4,7 @@ use XML::XPath::NodeSet;
 
 class XML::XPath::Step is XML::XPath::Expr {
     # TODO
-    subset Axis of Str where {$_ ~~ <child self>.any};
+    subset Axis of Str where {$_ ~~ <child self attribute>.any};
     #subset Test of Str where {$_ ~~ any<>};
 
     # from Expr;

@@ -5,6 +5,7 @@ use XML::XPath::NodeSet;
 
 class XML::XPath {
     has $.document;
+    has $.debug = 0;
 
     submethod BUILD(:$file, :$xml, :$document) {
         my $doc;
@@ -27,8 +28,9 @@ class XML::XPath {
     }
 
     method parse-xpath(Str $xpath) {
-        my $actions        = XML::XPath::Actions.new();
+        my $actions        = XML::XPath::Actions.new(:$.debug);
         my $match          = XML::XPath::Grammar.parse($xpath, :$actions);
+        say $match if $.debug;
         my $parsed-xpath   = $match.ast;
         return $parsed-xpath;
     }
