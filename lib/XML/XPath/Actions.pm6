@@ -1,12 +1,16 @@
 use v6.c;
 use XML::XPath::Expr;
 use XML::XPath::Step;
+use Data::Dump;
 
 class XML::XPath::Actions {
     my sub mymake($/, $made, Int :$level = 1) {
         my $caller = callframe($level);
-        my Str $gist = $made.gist;
-        say "called make from { $caller.code.gist } setting it to: " ~ ($gist.chars > 30 ?? "\n    $gist" !! $gist);
+        my Str $dump = $made.gist.chars > 30
+        ?? "\n" ~ Dump($made, :skip-methods(True))
+        !! $made.gist;
+
+        say "called make from { $caller.code.gist } setting it to: $dump";
         $/.make: $made;
     }
 
@@ -79,7 +83,7 @@ class XML::XPath::Actions {
         my $operator-prefix = $/<UnaryOperator>;
         my $expr = XML::XPath::Expr.new(
             expression => $union-expression.made,
-            operator   => $operator-prefix,
+            operator   => $operator-prefix.Str,
         );
         mymake($/, $expr);
     }
@@ -96,6 +100,20 @@ class XML::XPath::Actions {
         X::NYI.new(feature => 'PrimaryExpr').throw;
     }
 
+    method AbsoluteLocationPath($/) {
+        my $operator = $/<StepOperator>.Str;
+        my $step     = XML::XPath::Step.new(:$operator);
+
+        say $/;
+
+        if $/<RelativeLocationPath>:exists {
+            say "IF";
+            $step.expression = $/<RelativeLocationPath>.made;
+        } else {
+            say "ELSE";
+        }
+        mymake($/, $step);
+    }
     method RelativeLocationPath($/) {
         my @tokens = $/<Step>;
         my @operators = $/<StepOperator>;
@@ -103,7 +121,7 @@ class XML::XPath::Actions {
         my $last_expression;
         for @tokens.kv -> $i, $token {
             my $expression = $token.made;
-            my $expr = XML::XPath::Expr.new(:$expression);
+            my $expr = XML::XPath::Step.new(:$expression);
             if ($last_expression) {
                 $last_expression.operator(@operators[$i-1].made);
                 $last_expression.next($expr);
@@ -120,6 +138,14 @@ class XML::XPath::Actions {
             $path = $/<AbsoluteLocationPath>.made;
         }
         mymake($/, $path);
+    }
+    method PathExpr($/) {
+        if $/<LocationPath>:exists {
+            mymake($/, $/<LocationPath>.made);
+        } else {
+            X::NYI.new(feature => 'FilterExpr + optional Step&ReativeLocPath').throw;
+        }
+
     }
     method Step($/) {
         my $step;
@@ -177,8 +203,5 @@ class XML::XPath::Actions {
     }
     method AxisSpecifier($/) {
         mymake($/, ~$/);
-    }
-    method AbsoluteLocationPath($/) {
-        X::NYI.new(feature => 'AbsoluteLocationPath').throw;
     }
 }

@@ -25,6 +25,6 @@ ENDXML
 my @aaa = $x.find("/AAA");
 
 is @aaa.elems, 1 , 'found one AAA';
-say @aaa;
+#say @aaa;
 
 done-testing;

@@ -12,15 +12,15 @@ grammar XML::XPath::Grammar {
     }
 
     # [2]
+    # [10] token AbbreviatedAbsoluteLocationPath
     token AbsoluteLocationPath {
-        '/' <RelativeLocationPath>?
-        | <AbbreviatedAbsoluteLocationPath>
+        <StepOperator> <RelativeLocationPath>?
     }
 
     # [3]
     #token RelativeLocationPath {
     #    <Step>
-    #    | <RelativeLocationPath> '/' <Step>
+    #    | <RelativeLocationPath> x'/' <Step>
     #    | <AbbreviatedRelativeLocationPath>
     #}
     # [11]
@@ -73,12 +73,6 @@ grammar XML::XPath::Grammar {
     # [9]
     token PredicateExpr { <Expr> }
 
-    # [10]
-    token AbbreviatedAbsoluteLocationPath {
-        '//' <RelativeLocationPath>
-    }
-
-
     # [12]
     token AbbreviatedStep { '.' | '..' }
 
@@ -108,7 +102,7 @@ grammar XML::XPath::Grammar {
 
     # [19]
     token PathExpr {
-        <FilterExpr> [ [ '//' | '/' ] <RelativeLocationPath> ]?
+        <FilterExpr> [ <StepOperator> <RelativeLocationPath> ]?
         | <LocationPath>
     }
 
