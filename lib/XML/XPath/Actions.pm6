@@ -73,8 +73,8 @@ class XML::XPath::Actions {
         for @tokens.kv -> $i, $token {
             my $expression = $token.made;
             if ($last_expression) {
-                $last_expression.operator(@operators[$i-1].made);
-                $last_expression.next($expression);
+                $last_expression.operator = @operators[$i-1].made;
+                $last_expression.next = $expression;
             }
             $last_expression = $expression;
         }
@@ -121,16 +121,18 @@ class XML::XPath::Actions {
         my @operators = $/<StepOperator>;
         die 'at least 1 *Expr required' if @tokens.elems < 1;
         my $last_expression;
+        my $first_expression;
+
         for @tokens.kv -> $i, $token {
             my $expression = $token.made;
-            my $expr = XML::XPath::Step.new(:$expression);
             if ($last_expression) {
-                $last_expression.operator = @operators[$i-1].made;
-                $last_expression.next     = $expr;
+                $expression.operator  = @operators[$i-1].Str;
+                $last_expression.next = $expression;
             }
+            $first_expression = $expression unless $first_expression;
             $last_expression = $expression;
         }
-        mymake($/, $last_expression);
+        mymake($/, $first_expression);
     }
     method LocationPath($/) {
         my $path;

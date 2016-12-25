@@ -20,12 +20,16 @@ class XML::XPath {
     }
 
     method find(Str $xpath) {
-        my $actions        = XML::XPath::Actions.new();
-        my $match          = XML::XPath::Grammar.parse($xpath, :$actions);
-        my $parsed-xpath   = $match.ast;
-        say $parsed-xpath.perl;
+        my $parsed-xpath = self.parse-xpath($xpath);
         my $start-nodeset  = XML::XPath::NodeSet.new($.document);
         my $result-nodeset = $parsed-xpath.evaluate($start-nodeset);
         return $result-nodeset;
+    }
+
+    method parse-xpath(Str $xpath) {
+        my $actions        = XML::XPath::Actions.new();
+        my $match          = XML::XPath::Grammar.parse($xpath, :$actions);
+        my $parsed-xpath   = $match.ast;
+        return $parsed-xpath;
     }
 }
