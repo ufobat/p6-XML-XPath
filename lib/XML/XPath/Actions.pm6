@@ -102,15 +102,13 @@ class XML::XPath::Actions {
 
     method AbsoluteLocationPath($/) {
         my $operator = $/<StepOperator>.Str;
-        my $step     = XML::XPath::Step.new(:$operator);
 
-        say $/;
-
+        my $step;
         if $/<RelativeLocationPath>:exists {
-            say "IF";
-            $step.expression = $/<RelativeLocationPath>.made;
+            $step = $/<RelativeLocationPath>.made;
+            $step.operator = $operator;
         } else {
-            say "ELSE";
+            $step = XML::XPath::Step.new(:$operator);
         }
         mymake($/, $step);
     }
