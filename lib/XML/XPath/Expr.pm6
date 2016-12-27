@@ -2,19 +2,18 @@ use v6.c;
 use XML::XPath::NodeSet;
 
 class XML::XPath::Expr {
-    has $.expression is rw;
+    has $.operand is rw;
     has $.operator is rw;
-    has $.next is rw;
-    has @.predicates;
+    has $.other-operand is rw;
 
     method evaluate(XML::XPath::NodeSet $set) {
         if $.operator {
             # operator and $.next belong together
-            my $rhs-set = $.next.evalutate($set);
+            my $other-set = $.other-operand.evalutate($set);
             # TODO to something smart with $.expression and $rhs-set;
             X::NYI.new(feature => 'evalute of Expr with operator').throw;
         } else {
-            return $.expression.evaluate($set);
+            return $.operand.evaluate($set);
         }
     }
 }

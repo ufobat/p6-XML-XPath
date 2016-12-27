@@ -74,8 +74,8 @@ class XML::XPath::Actions {
         for @tokens.kv -> $i, $token {
             my $expression = $token.made;
             if ($last_expression) {
-                $last_expression.operator = @operators[$i-1].Str;
-                $last_expression.next     = $expression;
+                $last_expression.operator       = @operators[$i-1].Str;
+                $last_expression.other-operator = $expression;
             }
             $last_expression = $expression;
             $first_expression = $expression unless $first_expression;
@@ -87,8 +87,8 @@ class XML::XPath::Actions {
         my $union-expression = $/<UnionExpr>;
         my $operator-prefix = $/<UnaryOperator>;
         my $expr = XML::XPath::Expr.new(
-            expression => $union-expression.made,
-            operator   => $operator-prefix.Str,
+            operand  => $union-expression.made,
+            operator => $operator-prefix.Str,
         );
         self.mymake($/, $expr);
     }
@@ -108,10 +108,10 @@ class XML::XPath::Actions {
         } elsif $/<Expr>:exists {
             X::NYI.new(feature => 'PrimaryExpr - Expr').throw;
         } elsif $/<Literal>:exists {
-            $expression.expression = $/<Literal>.made;
+            $expression.operand = $/<Literal>.made;
             self.mymake($/, $expression);
         } elsif $/<Number>:exists {
-            $expression.expression = $/<Number>.Int;
+            $expression.operand = $/<Number>.Int;
             self.mymake($/, $expression);
         } else  {
             X::NYI.new(feature => 'PrimaryExpr - FunctionCall').throw;
@@ -122,16 +122,20 @@ class XML::XPath::Actions {
         self.mymake($/, $str.substr(1,*-1));
     }
 
+    sub operator_to_axis(Str $operator) {
+        my $axis = $operator eq '/' ?? 'self' !! 'child';
+        return $axis;
+    }
+
     method AbsoluteLocationPath($/) {
         my $operator = $/<StepOperator>.Str;
-
+        my $axis = $operator eq '/' ?? 'self' !! 'child';
         my $step;
         if $/<RelativeLocationPath>:exists {
             $step          = $/<RelativeLocationPath>.made;
-            $step.operator = $operator;
-            $step.axis     = 'self';
+            $step.axis     = $axis;
         } else {
-            $step = XML::XPath::Step.new(:$operator);
+            $step = XML::XPath::Step.new(:$axis);
         }
         self.mymake($/, $step);
     }
@@ -139,19 +143,21 @@ class XML::XPath::Actions {
         my @tokens = $/<Step>;
         my @operators = $/<StepOperator>;
         die 'at least 1 *Expr required' if @tokens.elems < 1;
-        my $last_expression;
-        my $first_expression;
+        my $last_step;
+        my $first_step;
 
         for @tokens.kv -> $i, $token {
-            my $expression = $token.made;
-            if ($last_expression) {
-                $expression.operator  = @operators[$i-1].Str;
-                $last_expression.expression = $expression;
+            my $step = $token.made;
+            if ($last_step) {
+                my $operator = @operators[$i-1].Str;
+                my $axis = $operator eq '/' ?? 'child' !! 'descendant';
+                $step.axis = $axis;
+                $last_step.next = $step;
             }
-            $first_expression = $expression unless $first_expression;
-            $last_expression = $expression;
+            $first_step = $step unless $first_step;
+            $last_step = $step;
         }
-        self.mymake($/, $first_expression);
+        self.mymake($/, $first_step);
     }
     method LocationPath($/) {
         my $path;
@@ -171,7 +177,7 @@ class XML::XPath::Actions {
                 my $stepoperator = $/<StepOperator>.Str;
                 my $rlp = $/<RelativeLocationPath>.made;
                 $rlp.operator = $stepoperator;
-                $filter.expression: $rlp;
+                $filter.operand: $rlp;
             }
             self.mymake($/, $filter);
         }

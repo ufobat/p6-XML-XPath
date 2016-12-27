@@ -14,10 +14,9 @@ $expression = "/aaa";
 is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
     operator => '',
-    expression => XML::XPath::Step.new(
+    operand  => XML::XPath::Step.new(
         axis     => 'self',
         literal  => 'aaa',
-        operator => '/',
     )
 ), $expression;
 
@@ -25,14 +24,12 @@ $expression = "/aaa/bbb";
 is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
     operator => '',
-    expression => XML::XPath::Step.new(
-        axis       => 'self',
-        literal    => 'aaa',
-        operator   => '/',
-        next       => XML::XPath::Step.new(
+    operand  => XML::XPath::Step.new(
+        axis     => 'self',
+        literal  => 'aaa',
+        next     => XML::XPath::Step.new(
             axis     => 'child',
             literal  => 'bbb',
-            operator => '/',
         )
     )
 ), $expression;
@@ -41,18 +38,15 @@ $expression = "/aaa/bbb/ccc";
 is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
     operator => '',
-    expression => XML::XPath::Step.new(
+    operand  => XML::XPath::Step.new(
         axis       => 'self',
         literal    => 'aaa',
-        operator   => '/',
         next       => XML::XPath::Step.new(
             axis     => 'child',
             literal  => 'bbb',
-            operator => '/',
             next     => XML::XPath::Step.new(
                 axis     => 'child',
                 literal  => 'ccc',
-                operator => '/',
             )
         )
     )
