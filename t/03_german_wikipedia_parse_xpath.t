@@ -127,9 +127,6 @@ XML::XPath::Expr.new(
     )
 ), $expression;
 
-use Data::Dump;
-my $xpath = $x.parse-xpath($expression);
-say Dump $xpath, :skip-methods(True);
 $expression = "//kap[2]/pa[@format='bold'][2]";
 is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
@@ -151,33 +148,54 @@ XML::XPath::Expr.new(
             operator   => '/',
             literal    => 'pa',
             predicates => [
-                           XML::XPath::Expr.new(
+                       XML::XPath::Expr.new(
+                           operator => '=',
+                           expression => XML::XPath::Step.new(
+                               axis    => 'attribute',
+                               literal => 'format',
+                           ),
+                           next => XML::XPath::Expr.new(
                                operator => '',
                                expression => XML::XPath::Expr.new(
                                    expression => 'bold',
                                )
                            ),
-                           XML::XPath::Expr.new(
-                               operator => '',
-                               expression => XML::XPath::Expr.new(
-                                   expression => 2,
-                               )
-                           ),
+                       ),
+                       XML::XPath::Expr.new(
+                           operator => '',
+                           expression => XML::XPath::Expr.new(
+                               expression => 2,
+                           )
+                       ),
                        ]
         ),
     )
 ), $expression;
-exit;
 
 $expression = "child::*";
 is-deeply $x.parse-xpath($expression),
-Any, $expression;
+XML::XPath::Expr.new(
+    operator   => "",
+    expression => XML::XPath::Step.new(
+        axis    => "child",
+        literal => "*",
+    )
+), $expression;
 
 $expression = "child::pa";
 is-deeply $x.parse-xpath($expression),
-Any, $expression;
+XML::XPath::Expr.new(
+    operator   => "",
+    expression => XML::XPath::Step.new(
+        axis    => "child",
+        literal => "pa",
+    )
+), $expression;
 
 $expression = "child::text()";
+use Data::Dump;
+my $xpath = $x.parse-xpath($expression);
+say Dump $xpath, :skip-methods(True);
 is-deeply $x.parse-xpath($expression),
 Any, $expression;
 
