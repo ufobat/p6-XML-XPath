@@ -1,6 +1,7 @@
 use v6.c;
 use XML::XPath::Expr;
 use XML::XPath::Step;
+use XML::XPath::NodeTest;
 use Data::Dump;
 
 class XML::XPath::Actions {
@@ -74,8 +75,8 @@ class XML::XPath::Actions {
         for @tokens.kv -> $i, $token {
             my $expression = $token.made;
             if ($last_expression) {
-                $last_expression.operator       = @operators[$i-1].Str;
-                $last_expression.other-operator = $expression;
+                $last_expression.operator      = @operators[$i-1].Str;
+                $last_expression.other-operand = $expression;
             }
             $last_expression = $expression;
             $first_expression = $expression unless $first_expression;
@@ -129,7 +130,7 @@ class XML::XPath::Actions {
 
     method AbsoluteLocationPath($/) {
         my $operator = $/<StepOperator>.Str;
-        my $axis = $operator eq '/' ?? 'self' !! 'child';
+        my $axis = $operator eq '/' ?? 'self' !! 'descendant-or-self';
         my $step;
         if $/<RelativeLocationPath>:exists {
             $step          = $/<RelativeLocationPath>.made;
@@ -150,7 +151,7 @@ class XML::XPath::Actions {
             my $step = $token.made;
             if ($last_step) {
                 my $operator = @operators[$i-1].Str;
-                my $axis = $operator eq '/' ?? 'child' !! 'descendant';
+                my $axis = $operator eq '/' ?? 'child' !! 'descendant-or-self';
                 $step.axis = $axis;
                 $last_step.next = $step;
             }
@@ -188,28 +189,26 @@ class XML::XPath::Actions {
         if $/<AbbreviatedStep>:exists {
             # . or ..
             $step = XML::XPath::Step.new(
-                axis    => 'child',
-                literal => $/<AbbreviatedStep>.Str,
+                axis => $/<AbbreviatedStep>.Str eq '..' ?? 'parent' !! 'self',
+                test => XML::XPath::NodeTest.new,
             );
         }
         else {
+            my $test = $/<NodeTest>.made;
+
             if $/<AxisSpecifier> eq '' {
-                my $literal = $/<NodeTest>.made;
                 $step = XML::XPath::Step.new(
                     axis => 'child',
-                    literal => $literal,
+                    :$test,
                 );
             } elsif $/<AxisSpecifier> eq '@' {
                 $step = XML::XPath::Step.new(
                     axis => 'attribute',
-                    literal => $<NodeTest>.made,
+                    :$test,
                 );
             } else {
                 my $axis = $/<AxisSpecifier>.substr(0,*-2);
-                $step = XML::XPath::Step.new(
-                    :$axis,
-                    literal => $<NodeTest>.made
-                );
+                $step = XML::XPath::Step.new(:$axis, :$test);
             }
         }
         my @predicates   = $/<Predicate>;
@@ -217,16 +216,21 @@ class XML::XPath::Actions {
         self.mymake($/, $step);
     }
     method NodeTest($/) {
+        my XML::XPath::NodeTest $nodetest;
         if $/<NameTest>:exists {
-            self.mymake($/, ~ $/<NameTest>);
+            $nodetest .= new(value => ~$/<NameTest>);
+            self.mymake($/, $nodetest);
         }
         elsif $/<NodeType>:exists {
-            X::NYI.new(feature => 'NodeTest').throw;
+            $nodetest .= new(type => ~$/<NodeType>);
         }
         else {
-            # processing-instruction (<Literal>)
-            X::NYI.new(feature => 'NodeTest').throw;
+            $nodetest .= new(
+                type  => 'processing-instruction',
+                value => ~$<Literal>
+            );
         }
+        self.mymake($/, $nodetest);
     }
     method Predicate($/) {
         self.mymake($/, $/<PredicateExpr>.made);

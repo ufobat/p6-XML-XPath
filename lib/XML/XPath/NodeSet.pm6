@@ -5,7 +5,7 @@ use XML;
 class XML::XPath::NodeSet {
     has @.nodes;
 
-    method add(XML::Element $elem) {
+    method add(XML::Node $elem) {
         @.nodes.push($elem);
     }
 

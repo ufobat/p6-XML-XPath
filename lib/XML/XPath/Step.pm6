@@ -1,23 +1,22 @@
 use v6.c;
 use XML::XPath::Expr;
 use XML::XPath::NodeSet;
+use XML::XPath::NodeTest;
 
 class XML::XPath::Step {
     # TODO
-    subset Axis of Str where {$_ ~~ <child self attribute>.any};
-    #subset Test of Str where {$_ ~~ any<>};-+
+    subset Axis of Str where {$_ ~~ <child self attribute descendant descendant-or-self>.any};
 
-    has Axis $.axis is rw;
-    has Str $.test;
-    has Str $.literal;
+    has Axis $.axis is rw is required;
+    has XML::XPath::NodeTest $.test is required;
     has @.predicates;
     has XML::XPath::Step $.next is rw;
 
     method evaluate(XML::XPath::NodeSet $set) {
         my $result = XML::XPath::NodeSet.new;
-        if $.axis and $.literal {
-            for $set.nodes -> $element {
-                self!evaluate-element($element, $result);
+        if $.axis {
+            for $set.nodes -> $node {
+                self!evaluate-node($node, $result);
             }
         } else {
             die 'this should never happen';
@@ -29,20 +28,14 @@ class XML::XPath::Step {
         return $result;
     }
 
-    method !evaluate-element(XML::Element $element, XML::XPath::NodeSet $result) {
+    method !evaluate-node(XML::Node $node, XML::XPath::NodeSet $result) {
         given $.axis {
             when 'self' {
-                if $element.name eq $.literal {
-                    $result.add($element);
-                } else {
-                    die "elementname: { $element.name } literal: {$.literal} did not match";
-                }
+                $.test.test($node, $result);
             }
             when 'child' {
-                for $element.nodes -> $child {
-                    if $child ~~ XML::Element {
-                        $result.add($child) if $child.name eq $.literal;
-                    }
+                for $node.nodes -> $child {
+                    $.test.test($child, $result);
                 }
             }
             default {
