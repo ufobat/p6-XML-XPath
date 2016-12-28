@@ -181,16 +181,24 @@ XML::XPath::Expr.new(
 ), $expression;
 
 $expression = "child::text()";
+is-deeply $x.parse-xpath($expression),
+XML::XPath::Expr.new(
+    operator => "",
+    operand  => XML::XPath::Step.new(
+        axis => "child",
+        test => XML::XPath::NodeTest.new(
+            type  => "text",
+        ),
+    ),
+), $expression;
+
+$expression = ".";
 use Data::Dump;
 my $xpath = $x.parse-xpath($expression);
 say Dump $xpath, :skip-methods(True);
 is-deeply $x.parse-xpath($expression),
 Any, $expression;
 exit;
-
-$expression = ".";
-is-deeply $x.parse-xpath($expression),
-Any, $expression;
 
 $expression = "./*";
 is-deeply $x.parse-xpath($expression),
