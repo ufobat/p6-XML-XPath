@@ -14,9 +14,9 @@ $expression = "/dok";
 is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
     operator => '',
-    operand => XML::XPath::Step.new(
-        axis     => 'self',
-        literal  => 'dok',
+    operand  => XML::XPath::Step.new(
+        axis => 'self',
+        test => XML::XPath::NodeTest.new(value => 'dok'),
     )
 ), $expression;
 
@@ -24,9 +24,9 @@ $expression = "/*";
 is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
     operator => '',
-    operand => XML::XPath::Step.new(
-        axis       => 'self',
-        literal    => '*',
+    operand  => XML::XPath::Step.new(
+        axis => 'self',
+        test => XML::XPath::NodeTest.new(value => '*'),
     )
 ), $expression;
 
@@ -34,12 +34,12 @@ $expression = "//dok/kap";
 is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
     operator => '',
-    operand => XML::XPath::Step.new(
-        axis       => 'descendant-or-self',
-        literal    => 'dok',
+    operand  => XML::XPath::Step.new(
+        axis => 'descendant-or-self',
+        test => XML::XPath::NodeTest.new(value => 'dok'),
         next => XML::XPath::Step.new(
-            axis     => 'child',
-            literal  => 'kap',
+            axis => 'child',
+            test => XML::XPath::NodeTest.new(value => 'kap'),
         )
     )
 ), $expression;
@@ -48,16 +48,16 @@ $expression = "//dok/kap[1]";
 is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
     operator => '',
-    operand => XML::XPath::Step.new(
-        axis    => 'descendant-or-self',
-        literal => 'dok',
-        next    => XML::XPath::Step.new(
-            axis     => 'child',
-            literal  => 'kap',
+    operand  => XML::XPath::Step.new(
+        axis => 'descendant-or-self',
+        test => XML::XPath::NodeTest.new(value => 'dok'),
+        next => XML::XPath::Step.new(
+            axis       => 'child',
+            test       => XML::XPath::NodeTest.new(value => 'kap'),
             predicates => [
                            XML::XPath::Expr.new(
                                operator => '',
-                               operand => XML::XPath::Expr.new(
+                               operand  => XML::XPath::Expr.new(
                                    operand => 1,
                                ),
                            ),
@@ -70,15 +70,15 @@ $expression = "//kap[@title='Nettes Kapitel']/pa";
 is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
     operator => '',
-    operand => XML::XPath::Step.new(
-        axis       => 'descendant-or-self',
-        literal    => 'kap',
+    operand  => XML::XPath::Step.new(
+        axis => 'descendant-or-self',
+        test => XML::XPath::NodeTest.new(value => 'kap'),
         predicates => [
                        XML::XPath::Expr.new(
                            operator => '=',
-                           operand => XML::XPath::Step.new(
-                               axis    => 'attribute',
-                               literal => 'title',
+                           operand  => XML::XPath::Step.new(
+                               axis => 'attribute',
+                               test => XML::XPath::NodeTest.new(value => 'title'),
                            ),
                            other-operand => XML::XPath::Expr.new(
                                operator => '',
@@ -89,8 +89,8 @@ XML::XPath::Expr.new(
                        ),
                    ],
         next => XML::XPath::Step.new(
-            axis     => 'child',
-            literal  => 'pa',
+            axis => 'child',
+            test => XML::XPath::NodeTest.new(value => 'pa'),
         ),
     )
 ), $expression;
@@ -99,12 +99,12 @@ $expression = "//kap/pa[2]";
 is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
     operator => '',
-    operand => XML::XPath::Step.new(
-        axis    => 'descendant-or-self',
-        literal => 'kap',
-        next    => XML::XPath::Step.new(
-            axis     => 'child',
-            literal  => 'pa',
+    operand  => XML::XPath::Step.new(
+        axis => 'descendant-or-self',
+        test => XML::XPath::NodeTest.new(value => 'kap'),
+        next => XML::XPath::Step.new(
+            axis => 'child',
+            test => XML::XPath::NodeTest.new(value => 'pa'),
             predicates => [
                            XML::XPath::Expr.new(
                                operator => '',
@@ -121,9 +121,9 @@ $expression = "//kap[2]/pa[@format='bold'][2]";
 is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
     operator => '',
-    operand => XML::XPath::Step.new(
-        axis       => 'descendant-or-self',
-        literal    => 'kap',
+    operand  => XML::XPath::Step.new(
+        axis => 'descendant-or-self',
+        test => XML::XPath::NodeTest.new(value => 'kap'),
         predicates => [
                        XML::XPath::Expr.new(
                            operator => '',
@@ -134,13 +134,13 @@ XML::XPath::Expr.new(
                    ],
         next => XML::XPath::Step.new(
             axis       => 'child',
-            literal    => 'pa',
+            test       => XML::XPath::NodeTest.new(value => 'pa'),
             predicates => [
                        XML::XPath::Expr.new(
                            operator => '=',
                            operand => XML::XPath::Step.new(
-                               axis    => 'attribute',
-                               literal => 'format',
+                               axis => 'attribute',
+                               test => XML::XPath::NodeTest.new(value => 'format'),
                            ),
                            other-operand => XML::XPath::Expr.new(
                                operator => '',
@@ -165,8 +165,8 @@ is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
     operator => "",
     operand  => XML::XPath::Step.new(
-        axis    => "child",
-        literal => "*",
+        axis => "child",
+        test => XML::XPath::NodeTest.new(value => '*'),
     )
 ), $expression;
 
@@ -175,8 +175,8 @@ is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
     operator => "",
     operand  => XML::XPath::Step.new(
-        axis    => "child",
-        literal => "pa",
+        axis => "child",
+        test => XML::XPath::NodeTest.new(value => 'pa'),
     )
 ), $expression;
 

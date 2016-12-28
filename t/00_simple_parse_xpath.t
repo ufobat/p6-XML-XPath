@@ -4,6 +4,7 @@ use Test;
 use XML::XPath;
 use XML::XPath::Expr;
 use XML::XPath::Step;
+use XML::XPath::NodeTest;
 
 plan 3;
 
@@ -15,8 +16,8 @@ is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
     operator => '',
     operand  => XML::XPath::Step.new(
-        axis     => 'self',
-        literal  => 'aaa',
+        axis => 'self',
+        test => XML::XPath::NodeTest.new(value => 'aaa'),
     )
 ), $expression;
 
@@ -25,11 +26,11 @@ is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
     operator => '',
     operand  => XML::XPath::Step.new(
-        axis     => 'self',
-        literal  => 'aaa',
-        next     => XML::XPath::Step.new(
-            axis     => 'child',
-            literal  => 'bbb',
+        axis => 'self',
+        test => XML::XPath::NodeTest.new(value => 'aaa'),
+        next => XML::XPath::Step.new(
+            axis => 'child',
+            test => XML::XPath::NodeTest.new(value => 'bbb'),
         )
     )
 ), $expression;
@@ -39,14 +40,14 @@ is-deeply $x.parse-xpath($expression),
 XML::XPath::Expr.new(
     operator => '',
     operand  => XML::XPath::Step.new(
-        axis       => 'self',
-        literal    => 'aaa',
-        next       => XML::XPath::Step.new(
-            axis     => 'child',
-            literal  => 'bbb',
-            next     => XML::XPath::Step.new(
-                axis     => 'child',
-                literal  => 'ccc',
+        axis => 'self',
+        test => XML::XPath::NodeTest.new(value => 'aaa'),
+        next => XML::XPath::Step.new(
+            axis => 'child',
+            test => XML::XPath::NodeTest.new(value => 'bbb'),
+            next => XML::XPath::Step.new(
+                axis => 'child',
+                test => XML::XPath::NodeTest.new(value => 'ccc'),
             )
         )
     )
