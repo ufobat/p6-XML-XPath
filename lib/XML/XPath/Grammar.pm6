@@ -90,7 +90,7 @@ grammar XML::XPath::Grammar {
 
     # [16]
     token FunctionCall {
-        <FunctionName> '(' [ <Argument>+ % ',' ] ')'
+        <FunctionName> '(' [ <Argument>* % ',' ] ')'
     }
 
     # [17]
