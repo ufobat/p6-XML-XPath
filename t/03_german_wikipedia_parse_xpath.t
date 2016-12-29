@@ -5,7 +5,7 @@ use XML::XPath;
 use XML::XPath::Expr;
 use XML::XPath::Step;
 
-plan 7;
+plan 17;
 
 my $x = XML::XPath.new;
 my $expression;
@@ -193,34 +193,118 @@ XML::XPath::Expr.new(
 ), $expression;
 
 $expression = ".";
-use Data::Dump;
-my $xpath = $x.parse-xpath($expression);
-say Dump $xpath, :skip-methods(True);
 is-deeply $x.parse-xpath($expression),
-Any, $expression;
-exit;
+XML::XPath::Expr.new(
+    operator => "",
+    operand  => XML::XPath::Step.new(
+        axis => "self",
+        test => XML::XPath::NodeTest.new(),
+    ),
+), $expression;
 
 $expression = "./*";
 is-deeply $x.parse-xpath($expression),
-Any, $expression;
-
+XML::XPath::Expr.new(
+    operator => "",
+    operand  => XML::XPath::Step.new(
+        axis => "self",
+        test => XML::XPath::NodeTest.new(),
+        next => XML::XPath::Step.new(
+            axis => "child",
+            test => XML::XPath::NodeTest.new(
+                type => "node",
+                value => "*"
+            ),
+        ),
+    )
+), $expression;
 $expression = "./pa";
 is-deeply $x.parse-xpath($expression),
-Any, $expression;
+XML::XPath::Expr.new(
+    operator => "",
+    operand  => XML::XPath::Step.new(
+        axis => "self",
+        test => XML::XPath::NodeTest.new(),
+        next => XML::XPath::Step.new(
+            axis => "child",
+            test => XML::XPath::NodeTest.new(
+                value => "pa"
+            ),
+        ),
+    ),
+), $expression;
 
 $expression = "pa";
 is-deeply $x.parse-xpath($expression),
-Any, $expression;
+XML::XPath::Expr.new(
+    operator => "",
+    operand  => XML::XPath::Step.new(
+        axis => "child",
+        test => XML::XPath::NodeTest.new(
+            value => "pa"
+        ),
+    ),
+), $expression;
+
+#use Data::Dump;
+#my $xpath = $x.parse-xpath($expression);
+#say Dump $xpath, :skip-methods(True);
 
 $expression = "attribute::*";
 is-deeply $x.parse-xpath($expression),
-Any, $expression;
+XML::XPath::Expr.new(
+    operator => "",
+    operand  => XML::XPath::Step.new(
+        axis => "attribute",
+        test => XML::XPath::NodeTest.new(
+            value => "*"
+        ),
+    ),
+), $expression;
 
 $expression = "namespace::*";
 is-deeply $x.parse-xpath($expression),
-Any, $expression;
+XML::XPath::Expr.new(
+    operator => "",
+    operand  => XML::XPath::Step.new(
+        axis => "namespace",
+        test => XML::XPath::NodeTest.new(
+            value => "*"
+        ),
+    ),
+), $expression;
 
 $expression = "//kap[1]/pa[2]/text()";
 is-deeply $x.parse-xpath($expression),
-Any, $expression;
+XML::XPath::Expr.new(
+    operator => "",
+    operand  => XML::XPath::Step.new(
+        axis => "descendant-or-self",
+        test => XML::XPath::NodeTest.new(value => "kap"),
+        predicates => [
+                       XML::XPath::Expr.new(
+                           operator => "",
+                           operand  => XML::XPath::Expr.new(
+                               operand => 1,
+                           ),
+                       )
+                   ],
+        next => XML::XPath::Step.new(
+            axis => "child",
+            test => XML::XPath::NodeTest.new(value => "pa"),
+            predicates => [
+                           XML::XPath::Expr.new(
+                               operator => "",
+                               operand  => XML::XPath::Expr.new(
+                                   operand => 2,
+                               ),
+                           )
+                       ],
+            next => XML::XPath::Step.new(
+                axis => "child",
+                test => XML::XPath::NodeTest.new(type => "text", value => Str),
+            )
+        ),
+    ),
+), $expression;
 

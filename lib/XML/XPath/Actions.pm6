@@ -238,9 +238,6 @@ class XML::XPath::Actions {
     method PredicateExpr($/) {
         self.mymake($/, $/<Expr>.made);
     }
-    method AbbreviatedStep($/) {
-        X::NYI.new(feature => 'AbbreviatedStep').throw;
-    }
     method AxisSpecifier($/) {
         self.mymake($/, ~$/);
     }

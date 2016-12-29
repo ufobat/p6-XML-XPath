@@ -5,7 +5,7 @@ use XML::XPath::NodeTest;
 
 class XML::XPath::Step {
     # TODO
-    subset Axis of Str where {$_ ~~ <child self attribute descendant descendant-or-self>.any};
+    subset Axis of Str where {$_ ~~ <child self attribute descendant descendant-or-self namespace>.any};
 
     has Axis $.axis is rw is required;
     has XML::XPath::NodeTest $.test is required;

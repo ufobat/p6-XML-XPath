@@ -5,7 +5,7 @@ use XML::XPath::NodeSet;
 
 class XML::XPath {
     has $.document;
-    has $.debug = 0;
+    has $.debug is rw = 0;
 
     submethod BUILD(:$file, :$xml, :$document) {
         my $doc;
