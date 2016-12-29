@@ -38,10 +38,24 @@ class XML::XPath::Step {
                     $.test.test($child, $result);
                 }
             }
+            when 'descendant' {
+                self!walk-descendant($node, $result);
+            }
+            when 'descendant-or-self' {
+                $.test.test($node, $result);
+                self!walk-descendant($node, $result);
+            }
             default {
                 X::NYI.new(feature => "axis $_").throw;
             }
         }
+    }
 
+    method !walk-descendant(XML::Node $node, XML::XPath::NodeSet $result) {
+        return unless $node.^can('nodes');
+        for $node.nodes -> $child {
+            $.test.test($child, $result);
+            self!walk-descendant($child, $result);
+        }
     }
 }

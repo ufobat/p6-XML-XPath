@@ -4,6 +4,7 @@ use Test;
 use XML::XPath;
 use XML::XPath::Expr;
 use XML::XPath::Step;
+use XML::XPath::NodeTest;
 
 plan 17;
 
