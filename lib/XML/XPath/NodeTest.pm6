@@ -1,12 +1,13 @@
 use v6.c;
 use XML::XPath::NodeSet;
+use XML::XPath::Testable;
 
-class XML::XPath::NodeTest {
+class XML::XPath::NodeTest does XML::XPath::Testable {
     subset Type of Str where { $_ ~~ <comment text node processing-instruction>.any}
     has Type $.type = "node";
     has Str $.value;
 
-    method test(XML::Node $node, XML::XPath::NodeSet $result) {
+    method test(Int $index, XML::Node $node, XML::XPath::NodeSet $result) {
         my Bool $take = False;
         given $.type {
             when 'node' {

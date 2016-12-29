@@ -1,9 +1,9 @@
 use v6.c;
-use XML::XPath::Expr;
 use XML::XPath::NodeSet;
 use XML::XPath::NodeTest;
+use XML::XPath::Evaluable;
 
-class XML::XPath::Step {
+class XML::XPath::Step does XML::XPath::Evaluable {
     # TODO
     subset Axis of Str where {$_ ~~ <child self attribute descendant descendant-or-self namespace>.any};
 
@@ -21,6 +21,11 @@ class XML::XPath::Step {
         } else {
             die 'this should never happen';
         }
+
+        for @.predicates -> $predicate {
+            $result = $predicate.evaluate($result);
+        }
+
         if $.next {
             $result = $.next.evaluate($result);
         }
@@ -31,18 +36,18 @@ class XML::XPath::Step {
     method !evaluate-node(XML::Node $node, XML::XPath::NodeSet $result) {
         given $.axis {
             when 'self' {
-                $.test.test($node, $result);
+                $.test.test(0, $node, $result);
             }
             when 'child' {
-                for $node.nodes -> $child {
-                    $.test.test($child, $result);
+                for $node.nodes.kv -> $i, $child {
+                    $.test.test($i, $child, $result);
                 }
             }
             when 'descendant' {
                 self!walk-descendant($node, $result);
             }
             when 'descendant-or-self' {
-                $.test.test($node, $result);
+                $.test.test(0, $node, $result);
                 self!walk-descendant($node, $result);
             }
             default {
@@ -53,8 +58,8 @@ class XML::XPath::Step {
 
     method !walk-descendant(XML::Node $node, XML::XPath::NodeSet $result) {
         return unless $node.^can('nodes');
-        for $node.nodes -> $child {
-            $.test.test($child, $result);
+        for $node.nodes.kv -> $i, $child {
+            $.test.test($i, $child, $result);
             self!walk-descendant($child, $result);
         }
     }

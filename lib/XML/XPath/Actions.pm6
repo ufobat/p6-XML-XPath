@@ -1,6 +1,7 @@
 use v6.c;
 use XML::XPath::Expr;
 use XML::XPath::Step;
+use XML::XPath::Number;
 use XML::XPath::NodeTest;
 use Data::Dump;
 
@@ -112,7 +113,8 @@ class XML::XPath::Actions {
             $expression.operand = $/<Literal>.made;
             self.mymake($/, $expression);
         } elsif $/<Number>:exists {
-            $expression.operand = $/<Number>.Int;
+            my $value = $/<Number>.Int;
+            $expression.operand = XML::XPath::Number.new(:$value);
             self.mymake($/, $expression);
         } else  {
             X::NYI.new(feature => 'PrimaryExpr - FunctionCall').throw;

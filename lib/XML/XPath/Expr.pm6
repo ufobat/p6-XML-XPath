@@ -1,24 +1,40 @@
 use v6.c;
 use XML::XPath::NodeSet;
+use XML::XPath::Evaluable;
+use XML::XPath::Testable;
 
-class XML::XPath::Expr {
+class XML::XPath::Expr does XML::XPath::Evaluable {
     has $.operand is rw;
     has $.operator is rw;
     has $.other-operand is rw;
     has @.predicates;
 
-    method evaluate(XML::XPath::NodeSet $set) {
-        my $nodeset = $.operand.evaluate($set);
+    method evaluate(XML::XPath::NodeSet $set --> XML::XPath::NodeSet) {
+        my $result;
+        if ($.operand ~~ XML::XPath::Testable) {
+            $result = XML::XPath::NodeSet.new;
+            for $set.nodes.kv -> $i, $node {
+                $.operand.test($i, $node, $result);
+            }
+        } elsif ($.operand ~~ XML::XPath::Evaluable)
+                 and $.operator
+                 and ($.other-operand ~~ XML::XPath::Evaluable) {
+            # evalute operand
+            # then other-operand
+            my $other-set = $.other-operand.evalutate($set);
+            X::NYI.new(feature => 'evalute of Expr with operator').throw;
+            # and use the operator
+        } elsif ($.operand ~~ XML::XPath::Evaluable) {
+            $result = $.operand.evaluate($set);
+        } else {
+            # thils should never happen!
+            die 'WHAT - this should never happen';
+        }
+
         if @.predicates {
             # TODO apply predicates to nodeset
             X::NYI.new(feature => 'evalute of Expr with predicates').throw;
         }
-        if $.operator {
-            # operator and $.next belong together
-            my $other-set = $.other-operand.evalutate($set);
-            # TODO to something smart with $.expression and $rhs-set;
-            X::NYI.new(feature => 'evalute of Expr with operator').throw;
-        }
-        return $nodeset
+        return $result;
     }
 }

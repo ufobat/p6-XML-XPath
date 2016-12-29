@@ -3,7 +3,7 @@ use v6.c;
 use XML;
 
 class XML::XPath::NodeSet {
-    has @.nodes;
+    has XML::Node @.nodes;
 
     method add(XML::Node $elem) {
         @.nodes.push($elem);
