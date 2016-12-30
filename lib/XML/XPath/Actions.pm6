@@ -125,18 +125,14 @@ class XML::XPath::Actions {
         self.mymake($/, $str.substr(1,*-1));
     }
 
-    sub operator_to_axis(Str $operator) {
-        my $axis = $operator eq '/' ?? 'self' !! 'child';
-        return $axis;
-    }
-
     method AbsoluteLocationPath($/) {
-        my $operator = $/<StepOperator>.Str;
-        my $axis = $operator eq '/' ?? 'self' !! 'descendant-or-self';
+        my $axis = $/<StepOperator>.Str eq '/'
+        ?? 'self'
+        !! 'descendant-or-self';
         my $step;
         if $/<RelativeLocationPath>:exists {
-            $step          = $/<RelativeLocationPath>.made;
-            $step.axis     = $axis;
+            $step      = $/<RelativeLocationPath>.made;
+            $step.axis = $axis;
         } else {
             $step = XML::XPath::Step.new(:$axis);
         }
@@ -153,9 +149,10 @@ class XML::XPath::Actions {
             my $step = $token.made;
             if ($last_step) {
                 my $operator = @operators[$i-1].Str;
-                my $axis = $operator eq '/' ?? 'child' !! 'descendant-or-self';
-                $step.axis = $axis;
-                $last_step.next = $step;
+                my $axis     = $operator eq '/'
+                ?? 'self'
+                !! 'descendant-or-self';
+                $last_step.next = XML::XPath::Step.new(:$axis, next => $step);
             }
             $first_step = $step unless $first_step;
             $last_step = $step;
@@ -192,7 +189,6 @@ class XML::XPath::Actions {
             # . or ..
             $step = XML::XPath::Step.new(
                 axis => $/<AbbreviatedStep>.Str eq '..' ?? 'parent' !! 'self',
-                test => XML::XPath::NodeTest.new,
             );
         }
         else {

@@ -7,13 +7,28 @@ class XML::XPath::NodeTest does XML::XPath::Testable {
     has Type $.type = "node";
     has Str $.value;
 
+    method test-attribute(Str $key, Str $val, XML::XPath::NodeSet $result) {
+        my Bool $take = False;
+        if $.value eq '*' {
+            $take = True
+        } elsif $.value eq $key {
+            $take = True;
+        } else {
+            say "no $val";
+        }
+
+        $result.add($val) if $take;
+    }
+
     method test(Int $index, XML::Node $node, XML::XPath::NodeSet $result) {
         my Bool $take = False;
         given $.type {
             when 'node' {
-                if $.value eq '*' {
+                if $.value ~~ Str:U {
+                    $take = True;
+                } elsif $.value eq '*' {
                     $take = $node ~~ XML::Element;
-                } elsif $.value ~~ Str:D {
+                } else {
                     my $name = $.value;
                     if $.value.contains(':') {
                         my @values = $.value.split(/':'/);
@@ -29,8 +44,6 @@ class XML::XPath::NodeTest does XML::XPath::Testable {
                     if $node ~~ XML::Element {
                         $take = $node.name eq $name;
                     }
-                } else {
-                    $take = True;
                 }
             }
             when 'text' {

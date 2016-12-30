@@ -3,9 +3,13 @@ use v6.c;
 use XML;
 
 class XML::XPath::NodeSet {
-    has XML::Node @.nodes;
+    has @.nodes;
 
-    method add(XML::Node $elem) {
+    multi method add(Str $elem) {
+        @.nodes.push($elem);
+    }
+
+    multi method add(XML::Node $elem) {
         @.nodes.push($elem);
     }
 

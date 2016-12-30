@@ -8,7 +8,7 @@ class XML::XPath::Step does XML::XPath::Evaluable {
     subset Axis of Str where {$_ ~~ <child self attribute descendant descendant-or-self namespace>.any};
 
     has Axis $.axis is rw is required;
-    has XML::XPath::NodeTest $.test is required;
+    has XML::XPath::NodeTest $.test = XML::XPath::NodeTest.new;
     has @.predicates;
     has XML::XPath::Step $.next is rw;
 
@@ -29,7 +29,6 @@ class XML::XPath::Step does XML::XPath::Evaluable {
         if $.next {
             $result = $.next.evaluate($result);
         }
-
         return $result;
     }
 
@@ -39,6 +38,7 @@ class XML::XPath::Step does XML::XPath::Evaluable {
                 $.test.test(0, $node, $result);
             }
             when 'child' {
+                return unless $node.^can('nodes');
                 for $node.nodes.kv -> $i, $child {
                     $.test.test($i, $child, $result);
                 }
@@ -49,6 +49,11 @@ class XML::XPath::Step does XML::XPath::Evaluable {
             when 'descendant-or-self' {
                 $.test.test(0, $node, $result);
                 self!walk-descendant($node, $result);
+            }
+            when 'attribute' {
+                for $node.attribs.kv -> $name, $value {
+                    $.test.test-attribute($name, $value, $result);
+                }
             }
             default {
                 X::NYI.new(feature => "axis $_").throw;
