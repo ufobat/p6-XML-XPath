@@ -7,20 +7,47 @@ class XML::XPath::NodeTest does XML::XPath::Testable {
     has Type $.type = "node";
     has Str $.value;
 
-    method test-attribute(Str $key, Str $val, XML::XPath::NodeSet $result) {
-        my Bool $take = False;
-        if $.value eq '*' {
-            $take = True
-        } elsif $.value eq $key {
-            $take = True;
-        } else {
-            say "no $val";
+    method test(XML::XPath::NodeSet $set, XML::XPath::NodeSet $result, Str $axis = 'self') {
+        for $set.nodes -> $node {
+            given $axis {
+                when 'self' {
+                    self!test-node($node, $result);
+                }
+                when 'child' {
+                    return unless $node.can('nodes');
+                    for $node.nodes -> $child {
+                        self!test-node($child, $result);
+                    }
+                }
+                when 'descendant' {
+                    self!walk-descendant($node, $result);
+                }
+                when 'descendant-or-self' {
+                    self!test-node($node, $result);
+                    self!walk-descendant($node, $result);
+                }
+                when 'attribute' {
+                    for $node.attribs.kv -> $key, $val {
+                        $result.add($val) if $.value eq '*' or $.value eq $key;
+                    }
+                }
+                default {
+                    X::NYI.new(feature => "axis $_").throw;
+                }
+            }
         }
-
-        $result.add($val) if $take;
     }
 
-    method test(Int $index, XML::Node $node, XML::XPath::NodeSet $result) {
+    method !walk-descendant(XML::Node $node, XML::XPath::NodeSet $result) {
+        return unless $node.can('nodes');
+        for $node.nodes -> $child {
+            self!test-node($child, $result);
+            self!walk-descendant($child, $result);
+        }
+    }
+
+
+    method !test-node(XML::Node $node, XML::XPath::NodeSet $result) {
         my Bool $take = False;
         given $.type {
             when 'node' {

@@ -13,9 +13,8 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
         my $result;
         if ($.operand ~~ XML::XPath::Testable) {
             $result = XML::XPath::NodeSet.new;
-            for $set.nodes.kv -> $i, $node {
-                $.operand.test($i, $node, $result);
-            }
+            # test on NodeSet instead of Node itself. FIXME
+            $.operand.test($set, $result);
         } elsif ($.operand ~~ XML::XPath::Evaluable)
                  and $.operator
                  and ($.other-operand ~~ XML::XPath::Evaluable) {

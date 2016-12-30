@@ -3,6 +3,7 @@ use XML::XPath::Expr;
 use XML::XPath::Step;
 use XML::XPath::Number;
 use XML::XPath::NodeTest;
+use XML::XPath::FunctionCall;
 use Data::Dump;
 
 class XML::XPath::Actions {
@@ -14,7 +15,11 @@ class XML::XPath::Actions {
             ?? "\n" ~ Dump($made, :skip-methods(True))
             !! $made.gist;
 
-            say "called make from { $caller.code.gist } setting it to: $dump";
+            if $.debug == 1 {
+                say "called make from { $caller.code.gist }";
+            } else {
+                say "called make from { $caller.code.gist } setting it to: $dump";
+            }
         }
         $/.make: $made;
     }
@@ -111,18 +116,25 @@ class XML::XPath::Actions {
             X::NYI.new(feature => 'PrimaryExpr - Expr').throw;
         } elsif $/<Literal>:exists {
             $expression.operand = $/<Literal>.made;
-            self.mymake($/, $expression);
         } elsif $/<Number>:exists {
             my $value = $/<Number>.Int;
             $expression.operand = XML::XPath::Number.new(:$value);
-            self.mymake($/, $expression);
         } else  {
-            X::NYI.new(feature => 'PrimaryExpr - FunctionCall').throw;
+            $expression.operand = $/<FunctionCall>.made;
         }
+        self.mymake($/, $expression);
     }
     method Literal($/) {
         my $str = $/.Str;
         self.mymake($/, $str.substr(1,*-1));
+    }
+    method FunctionCall($/) {
+        my @args = $/<Argument>;
+        my $func = XML::XPath::FunctionCall.new(
+            function => $/<FunctionName>.Str,
+            args => @args,
+        );
+        self.mymake($/, $func);
     }
 
     method AbsoluteLocationPath($/) {
@@ -169,18 +181,19 @@ class XML::XPath::Actions {
         self.mymake($/, $path);
     }
     method PathExpr($/) {
+        my $pathexpr;
         if $/<LocationPath>:exists {
-            self.mymake($/, $/<LocationPath>.made);
+            $pathexpr = $/<LocationPath>.made;
         } else {
-            my $filter = $/<FilterExpr>.made;
+            $pathexpr = $/<FilterExpr>.made;
             if $/<StepOperator>:exists {
                 my $stepoperator = $/<StepOperator>.Str;
                 my $rlp = $/<RelativeLocationPath>.made;
                 $rlp.operator = $stepoperator;
-                $filter.operand: $rlp;
+                $pathexpr.operand: $rlp;
             }
-            self.mymake($/, $filter);
         }
+        self.mymake($/, $pathexpr);
 
     }
     method Step($/) {
