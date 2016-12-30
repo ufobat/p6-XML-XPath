@@ -15,7 +15,7 @@ class XML::XPath::FunctionCall does XML::XPath::Testable {
                 $result-of-function = XML::XPath::Number.new(value => $set.nodes.elems);
             }
             default {
-                X::NYI.new(feature => 'functioncall $.function').throw;
+                X::NYI.new(feature => "functioncall $.function").throw;
             }
         }
 
