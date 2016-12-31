@@ -21,9 +21,9 @@ class XML::XPath {
     }
 
     method find(Str $xpath) {
-        my $parsed-xpath = self.parse-xpath($xpath);
+        my $parsed-xpath   = self.parse-xpath($xpath);
         my $start-nodeset  = XML::XPath::NodeSet.new($.document);
-        my $result-nodeset = $parsed-xpath.evaluate($start-nodeset);
+        my $result-nodeset = $parsed-xpath.evaluate($start-nodeset, False);
         return $result-nodeset;
     }
 

@@ -1,14 +1,14 @@
 use v6.c;
 
-use XML::XPath::Testable;
+use XML::XPath::Evaluable;
 use XML::XPath::Number;
+use XML::XPath::Types;
 
-class XML::XPath::FunctionCall does XML::XPath::Testable {
-    subset Function of Str where {$_ ~~ <last position count id local-name namespace-uri name concat starts-with contain substring-before substring-after substring string-length normalize-space translate boolean not true false lang number sum floor ceiling round>.any};
+class XML::XPath::FunctionCall does XML::XPath::Evaluable {
     has $.function is required;
     has @.args;
 
-    method test(XML::XPath::NodeSet $set, XML::XPath::NodeSet $result, Str $axis = 'self') {
+    method evaluate(XML::XPath::NodeSet $set, Bool $keep, Axis $axis = 'self') {
         my $result-of-function;
         given $.function {
             when 'last' {
@@ -19,6 +19,6 @@ class XML::XPath::FunctionCall does XML::XPath::Testable {
             }
         }
 
-        $result-of-function.test($set, $result, $axis);
+        return $result-of-function.evaluate($set, $keep, $axis);
     }
 }

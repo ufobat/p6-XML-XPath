@@ -2,30 +2,28 @@ use v6.c;
 use XML::XPath::NodeSet;
 use XML::XPath::NodeTest;
 use XML::XPath::Evaluable;
+use XML::XPath::Types;
 
 class XML::XPath::Step does XML::XPath::Evaluable {
-    # TODO
-    subset Axis of Str where {$_ ~~ <child self attribute descendant descendant-or-self namespace>.any};
-
     has Axis $.axis is rw is required;
     has XML::XPath::NodeTest $.test = XML::XPath::NodeTest.new;
     has @.predicates;
     has XML::XPath::Step $.next is rw;
 
-    method evaluate(XML::XPath::NodeSet $set) {
-        my $result = XML::XPath::NodeSet.new;
+    method evaluate(XML::XPath::NodeSet $set, Bool $predicate, Axis $axis = 'self') {
+        my $result;
         if $.axis {
-            $.test.test($set, $result, $.axis);
+            $result = $.test.evaluate($set, $predicate, $.axis);
         } else {
             die 'this should never happen';
         }
 
-        for @.predicates -> $predicate {
-            $result = $predicate.evaluate($result);
+        for @.predicates {
+            $result = $_.evaluate($result, True);
         }
 
         if $.next {
-            $result = $.next.evaluate($result);
+            $result = $.next.evaluate($result, $predicate);
         }
         return $result;
     }

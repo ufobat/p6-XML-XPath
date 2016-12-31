@@ -1,34 +1,37 @@
 use v6.c;
 use XML::XPath::NodeSet;
-use XML::XPath::Testable;
+use XML::XPath::Evaluable;
+use XML::XPath::Types;
 
-class XML::XPath::NodeTest does XML::XPath::Testable {
-    subset Type of Str where { $_ ~~ <comment text node processing-instruction>.any}
+class XML::XPath::NodeTest does XML::XPath::Evaluable {
     has Type $.type = "node";
     has Str $.value;
 
-    method test(XML::XPath::NodeSet $set, XML::XPath::NodeSet $result, Str $axis = 'self') {
+    method evaluate(XML::XPath::NodeSet $set, Bool $predicate, Str $axis = 'self') {
+        my XML::XPath::NodeSet $result .= new;
         for $set.nodes -> $node {
             given $axis {
                 when 'self' {
-                    self!test-node($node, $result);
+                    self!test-node($node, $node, $result, $predicate);
                 }
                 when 'child' {
                     return unless $node.can('nodes');
                     for $node.nodes -> $child {
-                        self!test-node($child, $result);
+                        self!test-node($child, $node, $result, $predicate);
                     }
                 }
                 when 'descendant' {
-                    self!walk-descendant($node, $result);
+                    self!walk-descendant($node, $node, $result, $predicate);
                 }
                 when 'descendant-or-self' {
-                    self!test-node($node, $result);
-                    self!walk-descendant($node, $result);
+                    self!test-node($node, $node, $result, $predicate);
+                    self!walk-descendant($node, $node, $result, $predicate);
                 }
                 when 'attribute' {
                     for $node.attribs.kv -> $key, $val {
-                        $result.add($val) if $.value eq '*' or $.value eq $key;
+                        if $.value eq '*' or $.value eq $key {
+                            $result.add( $predicate ?? $node !! $val);
+                        }
                     }
                 }
                 default {
@@ -36,18 +39,18 @@ class XML::XPath::NodeTest does XML::XPath::Testable {
                 }
             }
         }
+        return $result;
     }
 
-    method !walk-descendant(XML::Node $node, XML::XPath::NodeSet $result) {
+    method !walk-descendant(XML::Node $node, XML::Node $node-from-set, XML::XPath::NodeSet $result, Bool $predicate) {
         return unless $node.can('nodes');
         for $node.nodes -> $child {
-            self!test-node($child, $result);
-            self!walk-descendant($child, $result);
+            self!test-node($child, $node-from-set, $result, $predicate);
+            self!walk-descendant($child, $node-from-set, $result, $predicate);
         }
     }
 
-
-    method !test-node(XML::Node $node, XML::XPath::NodeSet $result) {
+    method !test-node(XML::Node $node, XML::Node $node-from-set, XML::XPath::NodeSet $result, Bool $predicate) {
         my Bool $take = False;
         given $.type {
             when 'node' {
@@ -87,7 +90,8 @@ class XML::XPath::NodeTest does XML::XPath::Testable {
                 }
             }
         }
-
-        $result.add($node) if $take;
+        if $take {
+            $result.add( $predicate ?? $node-from-set !! $node );
+        }
     }
 }
