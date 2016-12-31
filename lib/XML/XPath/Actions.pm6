@@ -132,9 +132,12 @@ class XML::XPath::Actions {
         my @args = $/<Argument>;
         my $func = XML::XPath::FunctionCall.new(
             function => $/<FunctionName>.Str,
-            args => @args,
+            args => @args>>.made,
         );
         self.mymake($/, $func);
+    }
+    method Argument($/) {
+        self.mymake($/, $<Expr>.made);
     }
 
     method AbsoluteLocationPath($/) {

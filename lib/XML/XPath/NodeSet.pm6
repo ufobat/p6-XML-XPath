@@ -13,6 +13,10 @@ class XML::XPath::NodeSet {
         @.nodes.push($elem);
     }
 
+    method contains($something) {
+        return $something ~~ @.nodes.any;
+    }
+
     multi method new(XML::Document $document) {
         my @nodes = ($document.root);
         self.bless(:@nodes);

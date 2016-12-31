@@ -3,14 +3,14 @@ use v6.c;
 use Test;
 use XML::XPath;
 
-plan 8;
+plan 10;
 
 my $x = XML::XPath.new(xml => q:to/ENDXML/);
 <AAA>
 <BBB id='b1'/>
 <BBB id='b2'/>
 <BBB name='bbb'/>
-<BBB/>
+<BBB />
 </AAA>
 ENDXML
 
@@ -30,6 +30,7 @@ is $set.nodes[0].name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[not(@*)]');
 is $set.nodes.elems, 1 , 'found one node';
-#is $set.nodes[0].name, 'BBB', 'node name is BBB';
+is $set.nodes[0].name, 'BBB', 'node name is BBB';
+is $set.nodes[0].attribs.elems, 0, 'and node really has no attribute';
 
 done-testing;
