@@ -13,6 +13,16 @@ class XML::XPath::NodeSet {
         @.nodes.push($elem);
     }
 
+    multi method add(XML::XPath::NodeSet $other) {
+        for $other.nodes -> $node {
+            self.add: $node;
+        }
+    }
+
+    method equals(XML::XPath::NodeSet $other) {
+        return set(@.nodes) ~~ set($other.nodes);
+    }
+
     method contains($something) {
         return $something ~~ @.nodes.any;
     }

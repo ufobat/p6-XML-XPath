@@ -120,7 +120,7 @@ grammar XML::XPath::Grammar {
     token AndOperator { 'and' }
 
     # [23]
-    token EqualityExpr { <RelationalExpr>+ % <EqualityOperator> }
+    rule EqualityExpr { <RelationalExpr>+ % <EqualityOperator> }
     token EqualityOperator { ['=' || '!=' ] }
 
     # [24]

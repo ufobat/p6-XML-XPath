@@ -7,37 +7,42 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
     has Type $.type = "node";
     has Str $.value;
 
-    method evaluate(XML::XPath::NodeSet $set, Bool $predicate, Str $axis = 'self') {
+    multi method evaluate(XML::XPath::NodeSet $set, XML::Node $node, Bool $predicate, Axis :$axis = 'self', Int :$index) {
         my XML::XPath::NodeSet $result .= new;
-        for $set.nodes -> $node {
-            given $axis {
-                when 'self' {
-                    self!test-node($node, $node, $result, $predicate);
-                }
-                when 'child' {
-                    return unless $node.can('nodes');
-                    for $node.nodes -> $child {
-                        self!test-node($child, $node, $result, $predicate);
-                    }
-                }
-                when 'descendant' {
-                    self!walk-descendant($node, $node, $result, $predicate);
-                }
-                when 'descendant-or-self' {
-                    self!test-node($node, $node, $result, $predicate);
-                    self!walk-descendant($node, $node, $result, $predicate);
-                }
-                when 'attribute' {
-                    for $node.attribs.kv -> $key, $val {
-                        if $.value eq '*' or $.value eq $key {
-                            $result.add( $predicate ?? $node !! $val);
-                        }
-                    }
-                }
-                default {
-                    X::NYI.new(feature => "axis $_").throw;
+        given $axis {
+            when 'self' {
+                self!test-node($node, $node, $result, $predicate);
+            }
+            when 'child' {
+                return unless $node.can('nodes');
+                for $node.nodes -> $child {
+                    self!test-node($child, $node, $result, $predicate);
                 }
             }
+            when 'descendant' {
+                self!walk-descendant($node, $node, $result, $predicate);
+            }
+            when 'descendant-or-self' {
+                self!test-node($node, $node, $result, $predicate);
+                self!walk-descendant($node, $node, $result, $predicate);
+            }
+            when 'attribute' {
+                for $node.attribs.kv -> $key, $val {
+                    if $.value eq '*' or $.value eq $key {
+                        $result.add( $predicate ?? $node !! $val);
+                    }
+                }
+            }
+            default {
+                X::NYI.new(feature => "axis $_").throw;
+            }
+        }
+        return $result;
+    }
+    multi method evaluate(XML::XPath::NodeSet $set, Bool $predicate, Axis :$axis = 'self', Int :$index) {
+        my XML::XPath::NodeSet $result .= new;
+        for $set.nodes.kv -> $index, $node {
+            $result.add: self.evaluate($set, $node, $predicate, :$axis, :$index);
         }
         return $result;
     }
