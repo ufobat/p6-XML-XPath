@@ -205,7 +205,7 @@ grammar XML::XPath::Grammar {
     # [5]   	Name	   ::=   	NameStartChar (NameChar)*ken NCName {
     token NCName {
         # https://www.w3.org/TR/REC-xml/#NT-Name
-        <:L> <[\w] - [:]>*
+        <:L> <[\w\-\.] - [:]>*
     }
 
 }
