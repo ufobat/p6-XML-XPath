@@ -1,5 +1,5 @@
 use v6.c;
-use XML::XPath::NodeSet;
+use XML::XPath::Result::ResultList;
 use XML::XPath::NodeTest;
 use XML::XPath::Evaluable;
 use XML::XPath::Types;
@@ -10,15 +10,15 @@ class XML::XPath::Step does XML::XPath::Evaluable {
     has @.predicates;
     has XML::XPath::Step $.next is rw;
 
-    multi method evaluate(XML::XPath::NodeSet $set, XML::Node $node, Bool $predicate, Axis :$axis = 'self', Int :$index) {
+    multi method evaluate(XML::XPath::Result::ResultList $set, XML::XPath::Result::Node $node, Bool $predicate, Axis :$axis = 'self', Int :$index) {
         return self!evaluate($node, $predicate, $axis, $index, :$set);
     }
-    multi method evaluate(XML::XPath::NodeSet $set, Bool $predicate, Axis :$axis = 'self', Int :$index) {
+    multi method evaluate(XML::XPath::Result::ResultList $set, Bool $predicate, Axis :$axis = 'self', Int :$index) {
         return self!evaluate($set, $predicate, $axis, $index);
     }
 
     method !evaluate($what, Bool $predicate, Axis $str, Int $index, :$set) {
-        my XML::XPath::NodeSet $result;
+        my XML::XPath::Result::ResultList $result;
         if $.axis {
             $result = $set
             ?? $.test.evaluate($set, $what, $predicate, :$.axis, :$index)
@@ -28,7 +28,11 @@ class XML::XPath::Step does XML::XPath::Evaluable {
         }
 
         for @.predicates {
-            my $interim = XML::XPath::NodeSet.new();
+            my $interim = XML::XPath::Result::ResultList.new();
+            # a predicate should basically evaluate to a ResultList of True and False
+            # or Number
+
+            # this result filters the $result
             for $result.nodes.kv -> $index, $node {
                 $interim.add: $_.evaluate($result, $node, True, :$index);
             }

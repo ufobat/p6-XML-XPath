@@ -1,5 +1,5 @@
 use v6.c;
-use XML::XPath::NodeSet;
+use XML::XPath::Result::ResultList;
 use XML::XPath::Evaluable;
 use XML::XPath::Types;
 
@@ -12,10 +12,10 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
         '=' => 'op-equal',
     );
 
-    multi method evaluate(XML::XPath::NodeSet $set, XML::Node $node, Bool $predicate, Axis :$axis = 'self', Int :$index) {
+    multi method evaluate(XML::XPath::Result::ResultList $set, XML::XPath::Result::Node $node, Bool $predicate, Axis :$axis = 'self', Int :$index) {
         return self!evaluate($node, $predicate, $axis, $index, :$set);
     }
-    multi method evaluate(XML::XPath::NodeSet $set,                  Bool $predicate, Axis :$axis = 'self', Int :$index) {
+    multi method evaluate(XML::XPath::Result::ResultList $set, Bool $predicate, Axis :$axis = 'self', Int :$index) {
         return self!evaluate($set, $predicate, $axis, $index);
     }
     method !evaluate($what, Bool $predicate, Axis $axis, Int $index, :$set) {
@@ -39,7 +39,7 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
             ?? $.operand.evaluate($set, $what, $predicate, :$axis, :$index)
             !! $.operand.evaluate($what, $predicate, :$axis, :$index);
         } elsif ($.operand ~~ Str|Num) {
-            $result = XML::XPath::NodeSet.new;
+            $result = XML::XPath::Result::ResultList.new;
             $result.add: $.operand;
         } else {
             # thils should never happen!
@@ -55,8 +55,8 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
     }
 
     # in case signatures dont match ($what is a NodeSet) just loop over it.
-    method !op-equal(XML::Node $what, Bool $predicate, Axis $axis, Int $index, XML::XPath::NodeSet $set) {
-        my $result = XML::XPath::NodeSet.new;
+    method !op-equal(XML::XPath::Result::Node $what, Bool $predicate, Axis $axis, Int $index, XML::XPath::Result::ResultList $set) {
+        my $result = XML::XPath::Result::ResultList.new;
 
         my $first-set = $.operand.evaluate($set, $what, False, :$axis, :$index);
         my $other-set = $.other-operand.evaluate($set, $what, False, :$axis, :$index);

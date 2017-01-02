@@ -1,7 +1,12 @@
 use XML;
+use XML::XPath::Result;
+use XML::XPath::Result::Boolean;
+use XML::XPath::Result::Node;
+use XML::XPath::Result::Number;
+use XML::XPath::Result::String;
+use XML::XPath::Result::ResultList;
 use XML::XPath::Actions;
 use XML::XPath::Grammar;
-use XML::XPath::NodeSet;
 
 class XML::XPath {
     has $.document;
@@ -22,9 +27,9 @@ class XML::XPath {
 
     method find(Str $xpath) {
         my $parsed-xpath   = self.parse-xpath($xpath);
-        my $start-nodeset  = XML::XPath::NodeSet.new($.document);
-        my $result-nodeset = $parsed-xpath.evaluate($start-nodeset, False);
-        return $result-nodeset;
+        my $start-nodeset  = XML::XPath::Result::ResultList.new();
+        $start-nodeset.add: $.document;
+        return $parsed-xpath.evaluate($start-nodeset, False);
     }
 
     method parse-xpath(Str $xpath) {

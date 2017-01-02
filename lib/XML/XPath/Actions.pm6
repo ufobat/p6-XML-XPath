@@ -1,7 +1,6 @@
 use v6.c;
 use XML::XPath::Expr;
 use XML::XPath::Step;
-use XML::XPath::Number;
 use XML::XPath::NodeTest;
 use XML::XPath::FunctionCall;
 use Data::Dump;
@@ -118,7 +117,7 @@ class XML::XPath::Actions {
             $expression.operand = $/<Literal>.made;
         } elsif $/<Number>:exists {
             my $value = $/<Number>.Int;
-            $expression.operand = XML::XPath::Number.new(:$value);
+            $expression.operand = $value;
         } else  {
             $expression.operand = $/<FunctionCall>.made;
         }
