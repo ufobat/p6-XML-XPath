@@ -3,7 +3,7 @@ use v6.c;
 use Test;
 use XML::XPath;
 
-plan 10;
+plan 6;
 
 my $x = XML::XPath.new(xml => q:to/ENDXML/);
 <AAA>
@@ -23,7 +23,7 @@ is $set.nodes.elems, 1 , 'found one attrib';
 is $set.nodes[0].name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[normalize-space(@name)="bbb"]');
-is $set.nodes.elems, 3 , 'found one node';
+is $set.nodes.elems, 2 , 'found one node';
 is $set.nodes[0].name, 'BBB', 'node name is BBB';
 
 done-testing;
