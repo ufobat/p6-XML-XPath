@@ -12,13 +12,10 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
         '=' => 'op-equal',
     );
 
-    multi method evaluate(XML::XPath::Result::ResultList $set, XML::XPath::Result::Node $node, Bool $predicate, Axis :$axis = 'self', Int :$index) {
-        return self!evaluate($node, $predicate, $axis, $index, :$set);
+    method evaluate(XML::XPath::Result::ResultList $set, Axis :$axis = 'self', Int :$index) {
+        return self!evaluate($set, $axis, $index);
     }
-    multi method evaluate(XML::XPath::Result::ResultList $set, Bool $predicate, Axis :$axis = 'self', Int :$index) {
-        return self!evaluate($set, $predicate, $axis, $index);
-    }
-    method !evaluate($what, Bool $predicate, Axis $axis, Int $index, :$set) {
+    method !evaluate($set, Axis $axis, Int $index,) {
         my $result;
 
         if ($.operand ~~ XML::XPath::Evaluable)
@@ -28,22 +25,23 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
             # then other-operand
             ## TODO that is wrong
             if %operator-dispatch{$.operator}:exists {
-                $result = self!"%operator-dispatch{$.operator}"($what, $predicate, $axis, $index, $set);
+                my $first-set = $.operand.evaluate($set, :$axis, :$index);
+                my $other-set = $.other-operand.evaluate($set, :$axis, :$index);
+
+                $result = self."%operator-dispatch{$.operator}"($first-set, $other-set);
            } else {
                 X::NYI.new(feature => "Evaluaion of an Expr with $.operator operator").throw;
             }
 
             # and use the operator
         } elsif ($.operand ~~ XML::XPath::Evaluable) {
-            $result = $set
-            ?? $.operand.evaluate($set, $what, $predicate, :$axis, :$index)
-            !! $.operand.evaluate($what, $predicate, :$axis, :$index);
-        } elsif ($.operand ~~ Str|Num) {
-            $result = XML::XPath::Result::ResultList.new;
-            $result.add: $.operand;
+            $result = $.operand.evaluate($set, :$axis, :$index);
+        } elsif ($.operand ~~ Str) {
+            $result = XML::XPath::Result::String.new: value => $.operand;
+        } elsif ($.operand ~~ Int) {
+            $result = XML::XPath::Result::Number.new: value => $.operand;
         } else {
             # thils should never happen!
-            say self.perl;
             die 'WHAT - this should never happen';
         }
 
@@ -55,13 +53,35 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
     }
 
     # in case signatures dont match ($what is a NodeSet) just loop over it.
-    method !op-equal(XML::XPath::Result::Node $what, Bool $predicate, Axis $axis, Int $index, XML::XPath::Result::ResultList $set) {
+    multi method op-equal(XML::XPath::Result:D $one, XML::XPath::Result:D $another) {
+        XML::XPath::Result::Boolean.new: value => $one.equals($another);
+    }
+    multi method op-equal(XML::XPath::Result:D $one, XML::XPath::Result:U $another) {
+        XML::XPath::Result::Boolean.new: value => False,
+    }
+    multi method op-equal(XML::XPath::Result:U $one, XML::XPath::Result:D $another) {
+        XML::XPath::Result::Boolean.new: value => False,
+    }
+    multi method op-equal(XML::XPath::Result:U $one, XML::XPath::Result:U $another) {
+        XML::XPath::Result::Boolean.new: value => False,
+    }
+    multi method op-equal(XML::XPath::Result::ResultList $one, XML::XPath::Result $another) {
+        self.op-equal($another, $one);
+    }
+    multi method op-equal(XML::XPath::Result $one, XML::XPath::Result::ResultList $another) {
         my $result = XML::XPath::Result::ResultList.new;
+        for $another.nodes -> $node {
+            $result.add: self.op-equal($node, $one);
+        }
+        return $result;
+    }
+    multi method op-equal(XML::XPath::Result::ResultList $one, XML::XPath::Result::ResultList $another) {
+        my $maxsize = $one.elems max $another.elems;
+        my $result = XML::XPath::Result::ResulList.new;
 
-        my $first-set = $.operand.evaluate($set, $what, False, :$axis, :$index);
-        my $other-set = $.other-operand.evaluate($set, $what, False, :$axis, :$index);
-
-        $result.add: $what if $first-set.equals($other-set);
+        for 0..$maxsize -> $index {
+            $result.add: self.op-equal($one[$index], $another[$index])
+        }
         return $result;
     }
 }

@@ -7,32 +7,52 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
     has Type $.type = "node";
     has Str $.value;
 
-    multi method evaluate(XML::XPath::Result::ResultList $set, XML::XPath::Result::Node $node, Bool $predicate, Axis :$axis = 'self', Int :$index) {
-        my XML::XPath::Result::ResultList $result .= new;
+    method evaluate(XML::XPath::Result::ResultList $set, Axis :$axis = 'self', Int :$index) {
+        if $index.defined {
+            return self!evaluate-node($set[$index], $axis);
+        } else {
+            my XML::XPath::Result::ResultList $result .= new;
+            for $set.nodes -> $node {
+                $result.add: self!evaluate-node($node, $axis);
+            }
+            return $result;
+        }
+    }
+
+    method !evaluate-node(XML::XPath::Result::Node $node, Axis $axis --> XML::XPath::Result) {
         my $xml-node = $node.value;
+        my XML::XPath::Result $result;
         given $axis {
             when 'self' {
-                self!test-node($xml-node, $xml-node, $result, $predicate);
+                $result = self!test-node($xml-node, $xml-node);
             }
             when 'child' {
-                return $result unless $xml-node.can('nodes');
-                for $xml-node.nodes -> $child {
-                    self!test-node($child, $xml-node, $result, $predicate);
+                $result = XML::XPath::Result::ResultList.new;
+                if $xml-node.can('nodes') {
+                    for $xml-node.nodes -> $child {
+                        $result.add: self!test-node($child, $xml-node);
+                    }
                 }
             }
             when 'descendant' {
-                self!walk-descendant($xml-node, $xml-node, $result, $predicate);
+                $result = XML::XPath::Result::ResultList.new;
+                self!walk-descendant($xml-node, $xml-node, $result);
             }
             when 'descendant-or-self' {
-                self!test-node($xml-node, $xml-node, $result, $predicate);
-                self!walk-descendant($xml-node, $xml-node, $result, $predicate);
+                $result = XML::XPath::Result::ResultList.new;
+                $result.add: self!test-node($xml-node, $xml-node);
+                self!walk-descendant($xml-node, $xml-node, $result);
             }
             when 'attribute' {
+                $result = XML::XPath::Result::ResultList.new;
                 for $xml-node.attribs.kv -> $key, $val {
                     if $.value eq '*' or $.value eq $key {
-                        $result.add( $predicate ?? $node !! $val);
+                        $result.add($val);
+                    } else {
+                        $result.add();
                     }
                 }
+                $result = $result.trim: :to-list(True);
             }
             default {
                 X::NYI.new(feature => "axis $_").throw;
@@ -40,24 +60,16 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
         }
         return $result;
     }
-    multi method evaluate(XML::XPath::Result::ResultList $set, Bool $predicate, Axis :$axis = 'self', Int :$index) {
-        my XML::XPath::Result::ResultList $result .= new;
-        for $set.nodes.kv -> $index, $node {
-            my $tmp = self.evaluate($set, $node, $predicate, :$axis, :$index);
-            $result.add: $tmp;
-        }
-        return $result;
-    }
 
-    method !walk-descendant(XML::Node $node, XML::Node $node-from-set, XML::XPath::Result::ResultList $result, Bool $predicate) {
+    method !walk-descendant(XML::Node $node, XML::Node $node-from-set, XML::XPath::Result::ResultList $result) {
         return unless $node.can('nodes');
         for $node.nodes -> $child {
-            self!test-node($child, $node-from-set, $result, $predicate);
-            self!walk-descendant($child, $node-from-set, $result, $predicate);
+            $result.add: self!test-node($child, $node-from-set);
+            self!walk-descendant($child, $node-from-set, $result);
         }
     }
 
-    method !test-node(XML::Node $node, XML::Node $node-from-set, XML::XPath::Result::ResultList $result, Bool $predicate) {
+    method !test-node(XML::Node $node, XML::Node $node-from-set --> XML::XPath::Result::Node) {
         my Bool $take = False;
         given $.type {
             when 'node' {
@@ -97,8 +109,7 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
                 }
             }
         }
-        if $take {
-            $result.add( $predicate ?? $node-from-set !! $node );
-        }
+        return XML::XPath::Result::Node.new( value => $node) if $take;
+        return XML::XPath::Result::Node:U;
     }
 }

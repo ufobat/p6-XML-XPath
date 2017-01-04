@@ -17,20 +17,20 @@ ENDXML
 my $set;
 $set = $x.find('//BBB[@id]');
 is $set.nodes.elems, 2 , 'found one node';
-is $set.nodes[0].name, 'BBB', 'node name is BBB';
-is $set.nodes[1].name, 'BBB', 'node name is BBB';
+is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
+is $set.nodes[1].value.name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[@name]');
 is $set.nodes.elems, 1 , 'found one attrib';
-is $set.nodes[0].name, 'BBB', 'node name is BBB';
+is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[@*]');
 is $set.nodes.elems, 3 , 'found one node';
-is $set.nodes[0].name, 'BBB', 'node name is BBB';
+is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[not(@*)]');
 is $set.nodes.elems, 1 , 'found one node';
-is $set.nodes[0].name, 'BBB', 'node name is BBB';
-is $set.nodes[0].attribs.elems, 0, 'and node really has no attribute';
+is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
+is $set.nodes[0].value.attribs.elems, 0, 'and node really has no attribute';
 
 done-testing;

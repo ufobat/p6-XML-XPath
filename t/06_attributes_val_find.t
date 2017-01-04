@@ -16,14 +16,14 @@ ENDXML
 my $set;
 $set = $x.find('//BBB[@id="b1"]');
 is $set.nodes.elems, 1 , 'found one node';
-is $set.nodes[0].name, 'BBB', 'node name is BBB';
+is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[@name="bbb"]');
 is $set.nodes.elems, 1 , 'found one attrib';
-is $set.nodes[0].name, 'BBB', 'node name is BBB';
+is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[normalize-space(@name)="bbb"]');
 is $set.nodes.elems, 2 , 'found one node';
-is $set.nodes[0].name, 'BBB', 'node name is BBB';
+is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
 
 done-testing;

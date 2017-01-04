@@ -8,7 +8,7 @@ use XML::XPath::Result::Number;
 use XML::XPath::Result::String;
 
 class XML::XPath::Result::ResultList does XML::XPath::Result {
-    has XML::XPath::Result @.nodes;
+    has XML::XPath::Result @.nodes handles <AT-POS EXISTS-POS elems>;
 
     multi method add(Str $value) {
         self.add: XML::XPath::Result::String.new(:$value);
@@ -22,6 +22,12 @@ class XML::XPath::Result::ResultList does XML::XPath::Result {
     multi method add(XML::Node $value) {
         self.add: XML::XPath::Result::Node.new(:$value);
     }
+    multi method add() {
+        self.add: XML::XPath::Result:U;
+    }
+    multi method add(XML::XPath::Result:U $value) {
+        @.nodes.push: $value;
+    }
     multi method add(XML::XPath::Result::String $value) {
         @.nodes.push: $value;
     }
@@ -34,9 +40,12 @@ class XML::XPath::Result::ResultList does XML::XPath::Result {
     multi method add(XML::XPath::Result::Boolean $value) {
         @.nodes.push: $value;
     }
-    multi method add(XML::XPath::Result::ResultList $other) {
+    multi method add(XML::XPath::Result::ResultList $other where {$other.elems == 0}) {
+        self.add() if $other.elems == 0;
+    }
+    multi method add(XML::XPath::Result::ResultList $other where {$other.elems > 0}) {
         for $other.nodes -> $node {
-            self.add: $node;
+            @.nodes.push: $node;
         }
     }
     multi method add(XML::Document $document) {
@@ -64,5 +73,14 @@ class XML::XPath::Result::ResultList does XML::XPath::Result {
 
     method contains($something) {
         return $something ~~ @.nodes.any;
+    }
+
+    method trim(Bool :$to-list --> XML::XPath::Result) {
+        my @trimmed = @.nodes.grep(*.defined);
+        if not $to-list and @trimmed.elems == 1 {
+            return @trimmed[0];
+        } else {
+            return self.new(nodes => @trimmed);
+        }
     }
 }

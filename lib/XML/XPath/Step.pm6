@@ -10,37 +10,39 @@ class XML::XPath::Step does XML::XPath::Evaluable {
     has @.predicates;
     has XML::XPath::Step $.next is rw;
 
-    multi method evaluate(XML::XPath::Result::ResultList $set, XML::XPath::Result::Node $node, Bool $predicate, Axis :$axis = 'self', Int :$index) {
-        return self!evaluate($node, $predicate, $axis, $index, :$set);
-    }
-    multi method evaluate(XML::XPath::Result::ResultList $set, Bool $predicate, Axis :$axis = 'self', Int :$index) {
-        return self!evaluate($set, $predicate, $axis, $index);
-    }
-
-    method !evaluate($what, Bool $predicate, Axis $str, Int $index, :$set) {
-        my XML::XPath::Result::ResultList $result;
+    method evaluate(XML::XPath::Result::ResultList $set, Axis :$axis = 'self', Int :$index) {
+        my XML::XPath::Result $result;
         if $.axis {
-            $result = $set
-            ?? $.test.evaluate($set, $what, $predicate, :$.axis, :$index)
-            !! $.test.evaluate($what, $predicate, :$.axis);
+            $result = $.test.evaluate($set, :$.axis, :$index).trim: :to-list(True);
         } else {
             die 'this should never happen';
         }
 
-        for @.predicates {
-            my $interim = XML::XPath::Result::ResultList.new();
+        for @.predicates -> $predicate {
             # a predicate should basically evaluate to a ResultList of True and False
             # or Number
 
-            # this result filters the $result
+            my $interim = XML::XPath::Result::ResultList.new;
             for $result.nodes.kv -> $index, $node {
-                $interim.add: $_.evaluate($result, $node, True, :$index);
+                my $predicate-result = $predicate.evaluate($result, :$index);
+                say "predicate-result";
+                say $predicate-result;
+
+                if $predicate-result ~~ XML::XPath::Result::Number {
+                    $interim.add: $node if $predicate-result.value - 1 == $index;
+                } elsif $predicate-result ~~XML::XPath::Result::Boolean {
+                    $interim.add: $node if $predicate-result.Bool;
+                } else {
+                    for $predicate-result.nodes.kv -> $i, $node-result {
+                        $interim.add: $result[$i] if $node-result.Bool;
+                    }
+                }
             }
             $result = $interim;
         }
 
         if $.next {
-            $result = $.next.evaluate($result, $predicate, :$index);
+            $result = $.next.evaluate($result);
         }
         return $result;
     }
