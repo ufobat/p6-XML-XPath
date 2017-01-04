@@ -36,17 +36,23 @@ class XML::XPath::Actions {
         my @operators = $/<OrOperator>;
         self!expression(@tokens, $/, @operators);
     }
+    method OrOperator($/) { self.mymake($/, 'or') }
 
     method AndExpr($/) {
         my @tokens = $/<EqualityExpr>;
         my @operators = $/<AndOperator>;
         self!expression(@tokens, $/, @operators);
     }
+    method AndOperator($/) { self.mymake($/, 'and') }
 
     method EqualityExpr($/) {
         my @tokens = $/<RelationalExpr>;
         my @operators = $/<EqualityOperator>;
         self!expression(@tokens, $/, @operators);
+    }
+
+    method EqualityOperator($/) {
+        self.mymake($/, $/.Str eq '=' ?? 'equal' !! 'not-equal');
     }
 
     method RelationalExpr($/) {
@@ -61,10 +67,18 @@ class XML::XPath::Actions {
         self!expression(@tokens, $/, @operators);
     }
 
+    method AdditiveOperators($/) {
+        self.mymake($/, $/.Str eq '+' ?? 'plus' !! 'minus');
+    }
+
     method MultiplicativeExpr($/) {
         my @tokens = $/<UnaryExpr>;
         my @operators = $/<MultiplicativeOperator>;
         self!expression(@tokens, $/, @operators);
+    }
+
+    method MultiplicativeOperator($/) {
+        self.mymake($/, $/.Str eq '*' ?? 'multiply' !! $/.Str);
     }
 
     method UnionExpr($/) {
@@ -73,14 +87,23 @@ class XML::XPath::Actions {
         self!expression(@tokens, $/, @operators);
     }
 
+    method UnionOperator($/){
+        self.mymake($/, 'pipe');
+    }
+
     method !expression(@tokens, $/, @operators) {
         die 'at least 1 *Expr required' if @tokens.elems < 1;
         my $last_expression;
         my $first_expression;
         for @tokens.kv -> $i, $token {
             my $expression = $token.made;
+            if $expression ~~ XML::XPath::Step {
+                # in case a expression is a step wrap it so we can attach
+                # <some kind of operator> <Expr>
+                $expression = XML::XPath::Expr.new(operand => $expression);
+            }
             if ($last_expression) {
-                $last_expression.operator      = @operators[$i-1].Str;
+                $last_expression.operator      = @operators[$i-1].made;
                 $last_expression.other-operand = $expression;
             }
             $last_expression = $expression;
@@ -91,12 +114,21 @@ class XML::XPath::Actions {
 
     method UnaryExpr($/) {
         my $union-expression = $/<UnionExpr>;
-        my $operator-prefix = $/<UnaryOperator>;
-        my $expr = XML::XPath::Expr.new(
-            operand  => $union-expression.made,
-            operator => $operator-prefix.Str,
-        );
+        my $operator-prefix = $/<UnaryOperator>.made;
+        my $expr;
+        if $operator-prefix {
+            my $expr = XML::XPath::Expr.new(
+                operand  => $union-expression.made,
+                operator => $operator-prefix.Str,
+            );
+        } else {
+            $expr = $union-expression.made;
+        }
         self.mymake($/, $expr);
+    }
+
+    method UnaryOperator($/) {
+        self.mymake($/, $/.Str.chars % 2 ?? 'unary-minus' !! '');
     }
 
     method FilterExpr($/) {
@@ -253,5 +285,13 @@ class XML::XPath::Actions {
     }
     method AxisSpecifier($/) {
         self.mymake($/, ~$/);
+    }
+    method RelationalOperator($/) {
+        given $/.Str {
+            when '>'  {self.mymake($/, 'greater-than', level => 2) }
+            when '<'  {self.mymake($/, 'smaller-than', level => 2) }
+            when '>=' {self.mymake($/, 'greater-equal', level => 2) }
+            when '<=' {self.mymake($/, 'smaller-equal', level => 2) }
+        }
     }
 }
