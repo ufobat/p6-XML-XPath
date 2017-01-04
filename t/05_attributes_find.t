@@ -21,16 +21,16 @@ is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
 is $set.nodes[1].value.name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[@name]');
-is $set.nodes.elems, 1 , 'found one attrib';
-is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
+isa-ok $set, XML::XPath::Result::Node, 'found one node';
+is $set.value.name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[@*]');
 is $set.nodes.elems, 3 , 'found one node';
 is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[not(@*)]');
-is $set.nodes.elems, 1 , 'found one node';
-is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
-is $set.nodes[0].value.attribs.elems, 0, 'and node really has no attribute';
+isa-ok $set, XML::XPath::Result::Node, 'found one node';
+is $set.value.name, 'BBB', 'node name is BBB';
+is $set.value.attribs.elems, 0, 'and node really has no attribute';
 
 done-testing;

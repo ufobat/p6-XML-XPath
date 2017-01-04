@@ -24,8 +24,8 @@ ENDXML
 
 my $set;
 $set = $x.find("/AAA");
-is $set.nodes.elems, 1 , 'found one node';
-is $set.nodes[0].value.name, 'AAA', 'node name is AAA';
+isa-ok $set, XML::XPath::Result::Node, 'found one node';
+is $set.value.name, 'AAA', 'node name is AAA';
 
 $set = $x.find("/AAA/BBB");
 is $set.nodes.elems, 3 , 'found three nodes';

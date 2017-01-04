@@ -16,17 +16,17 @@ ENDXML
 
 my $set;
 $set = $x.find('/AAA/BBB[1]');
-is $set.nodes.elems, 1 , 'found one node';
-is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
-is $set.nodes[0].value.attribs<id>, 'first', 'right node is selected';
+isa-ok $set, XML::XPath::Result::Node, 'found one node';
+is $set.value.name, 'BBB', 'node name is BBB';
+is $set.value.attribs<id>, 'first', 'right node is selected';
 
 $set = $x.find('/AAA/BBB[1]/@id');
-is $set.nodes.elems, 1 , 'found one attrib';
-is $set.nodes[0], 'first', 'node attrib is first';
+isa-ok $set, XML::XPath::Result::String, 'found one node';
+is $set, 'first', 'node attrib is first';
 
 $set = $x.find('/AAA/BBB[last()]');
-is $set.nodes.elems, 1 , 'found one node';
-is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
-is $set.nodes[0].value.attribs<id>, 'last', 'right node is selected';
+isa-ok $set, XML::XPath::Result::Node, 'found one node';
+is $set.value.name, 'BBB', 'node name is BBB';
+is $set.value.attribs<id>, 'last', 'right node is selected';
 
 done-testing;

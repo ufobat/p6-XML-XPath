@@ -23,11 +23,20 @@ class XML::XPath {
         $!document = $doc;
     }
 
-    method find(Str $xpath) {
+    method find(Str $xpath, Bool :$to-list) {
         my $parsed-xpath   = self.parse-xpath($xpath);
         my $start-nodeset  = XML::XPath::Result::ResultList.new();
         $start-nodeset.add: $.document;
-        return $parsed-xpath.evaluate($start-nodeset);
+        my $result = $parsed-xpath.evaluate($start-nodeset);
+        if $to-list and not $result ~~ XML::XPath::Result::ResultList {
+            my $list = XML::XPath::Result::ResultList.new;
+            $list.add: $result;
+            return $list;
+        } elsif $result ~~ XML::XPath::Result::ResultList {
+            return $result.trim(:$to-list);
+        } else {
+            return $result;
+        }
     }
 
     method parse-xpath(Str $xpath) {

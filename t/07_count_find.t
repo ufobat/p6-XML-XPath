@@ -24,8 +24,7 @@ is $set, True, 'found 3 nodes';
 $set = $x.find('count(/AAA/*)=3');
 is $set, False, 'found 3 nodes';
 
-$set = $x.find('//*[count(BBB)=2]');
-say $set;
+$set = $x.find('//*[count(BBB)=2]', :to-list(True));
 is $set.nodes.elems, 1 , 'found one node';
 #is $set.nodes[0].name, 'DDD', 'node name is BBB';
 
@@ -34,7 +33,7 @@ is $set.nodes.elems, 2 , 'found two nodes';
 is $set.nodes[0].value.name, 'DDD', 'node name is DDD';
 is $set.nodes[1].value.name, 'EEE', 'node name is EEE';
 
-$set = $x.find('//*[count(*)=3]');
+$set = $x.find('//*[count(*)=3]', :to-list(True));
 is $set.nodes.elems, 1 , 'found one node';
 is $set.nodes[0].value.name, 'CCC', 'node name is CCC';
 
