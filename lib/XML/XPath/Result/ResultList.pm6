@@ -79,6 +79,8 @@ class XML::XPath::Result::ResultList does XML::XPath::Result {
         my @trimmed = @.nodes.grep(*.defined);
         if not $to-list and @trimmed.elems == 1 {
             return @trimmed[0];
+        }elsif not $to-list and @trimmed.elems == 0 {
+            return XML::XPath::Result:U;
         } else {
             return self.new(nodes => @trimmed);
         }
