@@ -3,7 +3,7 @@ use v6.c;
 use Test;
 use XML::XPath;
 
-plan 7;
+plan 9;
 
 my $x = XML::XPath.new(xml => q:to/ENDXML/);
 <AAA>
@@ -31,8 +31,8 @@ is $set.nodes.elems, 1 , 'found one node';
 
 $set = $x.find('//*[count(*)=2]');
 is $set.nodes.elems, 2 , 'found two nodes';
-#is $set.nodes[0].name, 'DDD', 'node name is DDD';
-#is $set.nodes[1].name, 'EEE', 'node name is EEE';
+is $set.nodes[0].value.name, 'DDD', 'node name is DDD';
+is $set.nodes[1].value.name, 'EEE', 'node name is EEE';
 
 $set = $x.find('//*[count(*)=3]');
 is $set.nodes.elems, 1 , 'found one node';
