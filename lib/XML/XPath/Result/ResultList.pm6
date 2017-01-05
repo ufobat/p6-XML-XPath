@@ -55,10 +55,6 @@ class XML::XPath::Result::ResultList does XML::XPath::Result {
         }
     }
 
-    method equals(XML::XPath::Result $other) {
-        return @.nodes ~~ $other.ResultList;
-    }
-
     method Str {
         @.nodes.Str;
     }

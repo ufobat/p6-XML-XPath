@@ -36,14 +36,14 @@ class XML::XPath::Actions {
         my @operators = $/<OrOperator>;
         self!expression(@tokens, $/, @operators);
     }
-    method OrOperator($/) { self.mymake($/, 'or') }
+    method OrOperator($/) { self.mymake($/, 'Or') }
 
     method AndExpr($/) {
         my @tokens = $/<EqualityExpr>;
         my @operators = $/<AndOperator>;
         self!expression(@tokens, $/, @operators);
     }
-    method AndOperator($/) { self.mymake($/, 'and') }
+    method AndOperator($/) { self.mymake($/, 'And') }
 
     method EqualityExpr($/) {
         my @tokens = $/<RelationalExpr>;
@@ -52,7 +52,7 @@ class XML::XPath::Actions {
     }
 
     method EqualityOperator($/) {
-        self.mymake($/, $/.Str eq '=' ?? 'equal' !! 'not-equal');
+        self.mymake($/, $/.Str eq '=' ?? 'Equal' !! 'NotEqual');
     }
 
     method RelationalExpr($/) {
@@ -68,7 +68,7 @@ class XML::XPath::Actions {
     }
 
     method AdditiveOperators($/) {
-        self.mymake($/, $/.Str eq '+' ?? 'plus' !! 'minus');
+        self.mymake($/, $/.Str eq '+' ?? 'Plus' !! 'Minus');
     }
 
     method MultiplicativeExpr($/) {
@@ -78,7 +78,7 @@ class XML::XPath::Actions {
     }
 
     method MultiplicativeOperator($/) {
-        self.mymake($/, $/.Str eq '*' ?? 'multiply' !! $/.Str);
+        self.mymake($/, $/.Str eq '*' ?? 'Multiply' !! $/.Str.tc);
     }
 
     method UnionExpr($/) {
@@ -88,7 +88,7 @@ class XML::XPath::Actions {
     }
 
     method UnionOperator($/){
-        self.mymake($/, 'pipe');
+        self.mymake($/, 'Pipe');
     }
 
     method !expression(@tokens, $/, @operators) {
@@ -128,7 +128,7 @@ class XML::XPath::Actions {
     }
 
     method UnaryOperator($/) {
-        self.mymake($/, $/.Str.chars % 2 ?? 'unary-minus' !! '');
+        self.mymake($/, $/.Str.chars % 2 ?? 'UnaryMinus' !! '');
     }
 
     method FilterExpr($/) {
@@ -288,10 +288,10 @@ class XML::XPath::Actions {
     }
     method RelationalOperator($/) {
         given $/.Str {
-            when '>'  {self.mymake($/, 'greater-than', level => 2) }
-            when '<'  {self.mymake($/, 'smaller-than', level => 2) }
-            when '>=' {self.mymake($/, 'greater-equal', level => 2) }
-            when '<=' {self.mymake($/, 'smaller-equal', level => 2) }
+            when '>'  {self.mymake($/, 'GreaterThan', level => 2) }
+            when '<'  {self.mymake($/, 'SmallerThan', level => 2) }
+            when '>=' {self.mymake($/, 'GreaterEqual', level => 2) }
+            when '<=' {self.mymake($/, 'SmallerEqual', level => 2) }
         }
     }
 }

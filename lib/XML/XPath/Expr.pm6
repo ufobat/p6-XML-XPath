@@ -20,8 +20,13 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
         and $.operator
         and ($.other-operand ~~ XML::XPath::Evaluable) {
 
+            try {
             my $operator-strategy = ::('XML::XPath::ExprOperator::' ~ $.operator.tc).new;
             $result = $operator-strategy.invoke(self, $set, :$axis, :$index);
+            CATCH {
+                say "caught $_";
+            }
+            }
 
         } elsif ($.operand ~~ XML::XPath::Evaluable) {
             $result = $.operand.evaluate($set, :$axis, :$index);

@@ -7,7 +7,6 @@ role XML::XPath::Result {
     method Str { ... }
     method Bool { ... }
     method Int { ... }
-    method equals($other) { ... }
 
 #    method ResultList {
 #        my $resultlist = XML::XPath::Result::ResultList.new;
