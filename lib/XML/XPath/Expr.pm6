@@ -3,6 +3,9 @@ use XML::XPath::Result::ResultList;
 use XML::XPath::Evaluable;
 use XML::XPath::Types;
 use XML::XPath::ExprOperator::Equal;
+use XML::XPath::ExprOperator::Pipe;
+use XML::XPath::ExprOperator::SmallerThan;
+use XML::XPath::ExprOperator::GreaterThan;
 
 class XML::XPath::Expr does XML::XPath::Evaluable {
     has $.operand is rw;
@@ -21,11 +24,11 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
         and ($.other-operand ~~ XML::XPath::Evaluable) {
 
             try {
-            my $operator-strategy = ::('XML::XPath::ExprOperator::' ~ $.operator.tc).new;
-            $result = $operator-strategy.invoke(self, $set, :$axis, :$index);
-            CATCH {
-                say "caught $_";
-            }
+                my $operator-strategy = ::('XML::XPath::ExprOperator::' ~ $.operator.tc).new;
+                $result = $operator-strategy.invoke(self, $set, :$axis, :$index);
+                CATCH {
+                    say "caught $_";
+                }
             }
 
         } elsif ($.operand ~~ XML::XPath::Evaluable) {
