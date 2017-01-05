@@ -54,6 +54,25 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
                 }
                 $result = $result.trim: :to-list(True);
             }
+            when 'parent' {
+                my $parent = $xml-node.parent;
+                $result = self!test-node($parent, $parent);
+            }
+            when 'ancestor' {
+                $result = XML::XPath::Result::ResultList.new;
+                while ($xml-node = $xml-node.parent) {
+                    last if $xml-node ~~ XML::Document;
+                    say $xml-node.name;
+                    $result.add: self!test-node($xml-node, $xml-node);
+                }
+            }
+            when 'ancestor-or-self' {
+                $result = XML::XPath::Result::ResultList.new;
+                $result.add: self!test-node($xml-node, $xml-node);
+                while ($xml-node = $xml-node.parent) {
+                    $result.add: self!test-node($xml-node, $xml-node);
+                }
+            }
             default {
                 X::NYI.new(feature => "axis $_").throw;
             }
