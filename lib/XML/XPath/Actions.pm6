@@ -178,7 +178,9 @@ class XML::XPath::Actions {
         my $step;
         if $/<RelativeLocationPath>:exists {
             $step      = $/<RelativeLocationPath>.made;
-            $step.axis = $axis;
+            if not $step.axis.defined or $step.axis eq 'child' {
+                $step.axis = $axis;
+            }
         } else {
             $step = XML::XPath::Step.new(:$axis);
         }

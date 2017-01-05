@@ -3,7 +3,7 @@ use v6.c;
 use Test;
 use XML::XPath;
 
-plan 6;
+plan 7;
 
 my $x = XML::XPath.new(xml => q:to/ENDXML/);
 <AAA>
@@ -23,6 +23,9 @@ my $x = XML::XPath.new(xml => q:to/ENDXML/);
 ENDXML
 
 my $set;
+$set = $x.find("/");
+isa-ok $set, XML::XPath::Result::Node, 'found one node';
+
 $set = $x.find("/AAA");
 isa-ok $set, XML::XPath::Result::Node, 'found one node';
 is $set.value.name, 'AAA', 'node name is AAA';
