@@ -1,20 +1,11 @@
+use v6.c;
+
 use Test;
-BEGIN { plan tests => 4 }
-
 use XML::XPath;
-ok(1);
 
-my $xp = XML::XPath->new(ioref => *DATA);
-ok($xp);
+plan 2;
 
-my @nodes;
-@nodes = $xp->findnodes('/AAA/XXX/following::*');
-ok(@nodes, 2);
-
-@nodes = $xp->findnodes('//ZZZ/following::*');
-ok(@nodes, 12);
-
-__DATA__
+my $x = XML::XPath.new(xml => q:to/ENDXML/);
 <AAA>
 <BBB>
     <CCC/>
@@ -43,3 +34,13 @@ __DATA__
     <DDD/>
 </CCC>
 </AAA>
+ENDXML
+
+my $set;
+$set = $x.find('/AAA/XXX/following::*');
+is $set.elems, 2 , 'found 2 nodes';
+
+$set = $x.find('//ZZZ/following::*');
+is $set.elems, 2 , 'found 2 nodes';
+
+done-testing;

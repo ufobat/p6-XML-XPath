@@ -1,27 +1,11 @@
+use v6.c;
+
 use Test;
-BEGIN { plan tests => 7 }
-
 use XML::XPath;
-ok(1);
 
-my $xp = XML::XPath->new(ioref => *DATA);
-ok($xp);
+plan 5;
 
-my @nodes;
-@nodes = $xp->findnodes('/AAA/XXX/preceding-sibling::*');
-ok(@nodes, 1);
-ok($nodes[0]->getName, "BBB");
-
-@nodes = $xp->findnodes('//CCC/preceding-sibling::*');
-ok(@nodes, 4);
-
-@nodes = $xp->findnodes('/AAA/CCC/preceding-sibling::*[1]');
-ok($nodes[0]->getName, "XXX");
-
-@nodes = $xp->findnodes('/AAA/CCC/preceding-sibling::*[2]');
-ok($nodes[0]->getName, "BBB");
-
-__DATA__
+my $x = XML::XPath.new(xml => q:to/ENDXML/);
 <AAA>
     <BBB>
         <CCC/>
@@ -42,3 +26,20 @@ __DATA__
         <DDD/>
     </CCC>
 </AAA>
+ENDXML
+
+my $set;
+$set = $x.find('/AAA/XXX/preceding-sibling::*');
+is $set.elems, 1, 'found one node';
+is $set[0].value.name, 'BBB', 'found node is BBB';
+
+$set = $x.find('//CCC/preceding-sibling::*');
+is $set.elems , 4, 'found four nodes';
+
+$set = $x.find('/AAA/CCC/preceding-sibling::*[1]');
+is $set.value.name , 'XXX', 'found node XXX';
+
+$set = $x.find('/AAA/CCC/preceding-sibling::*[2]');
+is $set.value.name , 'BBB', 'found node BBB';
+
+done-testing;

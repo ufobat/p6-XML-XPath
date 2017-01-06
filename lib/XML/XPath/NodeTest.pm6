@@ -82,11 +82,35 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
                     $result.add: self!test-node($_);
                 }
             }
+            when 'following' {
+                my @fs = self!get-following-siblings($xml-node);
+                $result = XML::XPath::Result::ResultList.new;
+                for @fs {
+                    $result.add: self!test-node($_);
+                    self!walk-descendant($_, $result);
+                }
+            }
+            when 'preceding-sibling' {
+                my @fs = self!get-preceding-siblings($xml-node);
+                $result = XML::XPath::Result::ResultList.new;
+                for @fs {
+                    $result.add: self!test-node($_);
+                }
+            }
             default {
                 X::NYI.new(feature => "axis $_").throw;
             }
         }
         return $result;
+    }
+
+    method !get-preceding-siblings(XML::Node $xml-node) {
+        my $parent = $xml-node.parent;
+        unless $parent ~~ XML::Document {
+            my $pos = $parent.index-of($xml-node);
+            return $parent.nodes[0 .. $pos-1].reverse;
+        }
+        return ();
     }
 
     method !get-following-siblings(XML::Node $xml-node) {
