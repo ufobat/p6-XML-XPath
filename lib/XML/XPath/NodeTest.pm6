@@ -24,24 +24,24 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
         my XML::XPath::Result $result;
         given $axis {
             when 'self' {
-                $result = self!test-node($xml-node, $xml-node);
+                $result = self!test-node($xml-node);
             }
             when 'child' {
                 $result = XML::XPath::Result::ResultList.new;
                 if $xml-node.can('nodes') {
                     for $xml-node.nodes -> $child {
-                        $result.add: self!test-node($child, $xml-node);
+                        $result.add: self!test-node($child);
                     }
                 }
             }
             when 'descendant' {
                 $result = XML::XPath::Result::ResultList.new;
-                self!walk-descendant($xml-node, $xml-node, $result);
+                self!walk-descendant($xml-node, $result);
             }
             when 'descendant-or-self' {
                 $result = XML::XPath::Result::ResultList.new;
-                $result.add: self!test-node($xml-node, $xml-node);
-                self!walk-descendant($xml-node, $xml-node, $result);
+                $result.add: self!test-node($xml-node);
+                self!walk-descendant($xml-node, $result);
             }
             when 'attribute' {
                 $result = XML::XPath::Result::ResultList.new;
@@ -56,21 +56,30 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
             }
             when 'parent' {
                 my $parent = $xml-node.parent;
-                $result = self!test-node($parent, $parent);
+                unless $parent ~~ XML::Document {
+                    $result = self!test-node($parent);
+                }
             }
             when 'ancestor' {
                 $result = XML::XPath::Result::ResultList.new;
                 while ($xml-node = $xml-node.parent) {
                     last if $xml-node ~~ XML::Document;
-                    $result.add: self!test-node($xml-node, $xml-node);
+                    $result.add: self!test-node($xml-node);
                 }
             }
             when 'ancestor-or-self' {
                 $result = XML::XPath::Result::ResultList.new;
-                $result.add: self!test-node($xml-node, $xml-node);
+                $result.add: self!test-node($xml-node);
                 while ($xml-node = $xml-node.parent) {
                     last if $xml-node ~~ XML::Document;
-                    $result.add: self!test-node($xml-node, $xml-node);
+                    $result.add: self!test-node($xml-node);
+                }
+            }
+            when 'following-sibling' {
+                my @fs = self!get-following-siblings($xml-node);
+                $result = XML::XPath::Result::ResultList.new;
+                for @fs {
+                    $result.add: self!test-node($_);
                 }
             }
             default {
@@ -80,15 +89,24 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
         return $result;
     }
 
-    method !walk-descendant(XML::Node $node, XML::Node $node-from-set, XML::XPath::Result::ResultList $result) {
+    method !get-following-siblings(XML::Node $xml-node) {
+        my $parent = $xml-node.parent;
+        unless $parent ~~ XML::Document {
+            my $pos = $parent.index-of($xml-node);
+            return $parent.nodes[$pos+1 .. *];
+        }
+        return ();
+    }
+
+    method !walk-descendant(XML::Node $node, XML::XPath::Result::ResultList $result) {
         return unless $node.can('nodes');
         for $node.nodes -> $child {
-            $result.add: self!test-node($child, $node-from-set);
-            self!walk-descendant($child, $node-from-set, $result);
+            $result.add: self!test-node($child);
+            self!walk-descendant($child, $result);
         }
     }
 
-    method !test-node(XML::Node $node, XML::Node $node-from-set --> XML::XPath::Result::Node) {
+    method !test-node(XML::Node $node --> XML::XPath::Result::Node) {
         my Bool $take = False;
         given $.type {
             when 'node' {
