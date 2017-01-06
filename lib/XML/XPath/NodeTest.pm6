@@ -62,7 +62,6 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
                 $result = XML::XPath::Result::ResultList.new;
                 while ($xml-node = $xml-node.parent) {
                     last if $xml-node ~~ XML::Document;
-                    say $xml-node.name;
                     $result.add: self!test-node($xml-node, $xml-node);
                 }
             }
@@ -70,6 +69,7 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
                 $result = XML::XPath::Result::ResultList.new;
                 $result.add: self!test-node($xml-node, $xml-node);
                 while ($xml-node = $xml-node.parent) {
+                    last if $xml-node ~~ XML::Document;
                     $result.add: self!test-node($xml-node, $xml-node);
                 }
             }
