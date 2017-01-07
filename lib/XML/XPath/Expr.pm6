@@ -24,7 +24,7 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
         and ($.other-operand ~~ XML::XPath::Evaluable) {
 
             try {
-                my $operator-strategy = ::('XML::XPath::ExprOperator::' ~ $.operator.tc).new;
+                my $operator-strategy = ::('XML::XPath::ExprOperator::' ~ $.operator).new;
                 $result = $operator-strategy.invoke(self, $set, :$axis, :$index);
                 CATCH {
                     say "caught $_";
@@ -38,7 +38,7 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
         } elsif ($.operand ~~ Int) {
             $result = XML::XPath::Result::Number.new: value => $.operand;
         } else {
-            # thils should never happen!
+            # this should never happen!
             die 'WHAT - this should never happen';
         }
 
