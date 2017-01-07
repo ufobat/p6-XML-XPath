@@ -41,6 +41,6 @@ $set = $x.find('/AAA/XXX/following::*');
 is $set.elems, 2 , 'found 2 nodes';
 
 $set = $x.find('//ZZZ/following::*');
-is $set.elems, 2 , 'found 2 nodes';
+is $set.elems, 12 , 'found 2 nodes';
 
 done-testing;

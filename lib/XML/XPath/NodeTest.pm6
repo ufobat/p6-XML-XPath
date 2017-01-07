@@ -83,7 +83,7 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
                 }
             }
             when 'following' {
-                my @fs = self!get-following-siblings($xml-node);
+                my @fs = self!get-following($xml-node);
                 $result = XML::XPath::Result::ResultList.new;
                 for @fs {
                     $result.add: self!test-node($_);
@@ -97,6 +97,14 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
                     $result.add: self!test-node($_);
                 }
             }
+            when 'preceding' {
+                my @fs = self!get-preceding($xml-node);
+                $result = XML::XPath::Result::ResultList.new;
+                for @fs {
+                    $result.add: self!test-node($_);
+                    self!walk-descendant($_, $result);
+                }
+            }
             default {
                 X::NYI.new(feature => "axis $_").throw;
             }
@@ -104,6 +112,16 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
         return $result;
     }
 
+    method !get-preceding(XML::Node $xml-node is copy) {
+        my @preceding;
+        loop {
+            my $parent = $xml-node.parent;
+            last if $parent ~~ XML::Document;
+            @preceding.append: self!get-preceding-siblings($xml-node);;
+            $xml-node = $parent;
+        }
+        @preceding;
+    }
     method !get-preceding-siblings(XML::Node $xml-node) {
         my $parent = $xml-node.parent;
         unless $parent ~~ XML::Document {
@@ -113,6 +131,16 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
         return ();
     }
 
+    method !get-following(XML::Node $xml-node is copy) {
+        my @following;
+        loop {
+            my $parent = $xml-node.parent;
+            last if $parent ~~ XML::Document;
+            @following.append: self!get-following-siblings($xml-node);;
+            $xml-node = $parent;
+        }
+        @following;
+    }
     method !get-following-siblings(XML::Node $xml-node) {
         my $parent = $xml-node.parent;
         unless $parent ~~ XML::Document {
