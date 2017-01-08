@@ -117,7 +117,8 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
         loop {
             my $parent = $xml-node.parent;
             last if $parent ~~ XML::Document;
-            @preceding.append: self!get-preceding-siblings($xml-node);;
+            # document order!
+            @preceding.prepend: self!get-preceding-siblings($xml-node);;
             $xml-node = $parent;
         }
         @preceding;
@@ -136,6 +137,7 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
         loop {
             my $parent = $xml-node.parent;
             last if $parent ~~ XML::Document;
+            # document order!
             @following.append: self!get-following-siblings($xml-node);;
             $xml-node = $parent;
         }

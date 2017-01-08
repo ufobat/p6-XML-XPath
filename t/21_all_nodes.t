@@ -1,39 +1,11 @@
+use v6.c;
+
 use Test;
-BEGIN { plan tests => 11 }
-
 use XML::XPath;
-ok(1);
 
-my $xp = XML::XPath->new(ioref => *DATA);
-ok($xp);
+plan 15;
 
-my @nodes;
-@nodes = $xp->findnodes('//GGG/ancestor::*');
-ok(@nodes, 4);
-
-@nodes = $xp->findnodes('//GGG/descendant::*');
-ok(@nodes, 3);
-
-@nodes = $xp->findnodes('//GGG/following::*');
-ok(@nodes, 3);
-ok($nodes[0]->getName, "VVV");
-
-@nodes = $xp->findnodes('//GGG/preceding::*');
-ok(@nodes, 5);
-ok($nodes[0]->getName, "BBB"); # document order, not HHH
-
-@nodes = $xp->findnodes('//GGG/self::*');
-ok(@nodes, 1);
-ok($nodes[0]->getName, "GGG");
-
-@nodes = $xp->findnodes('//GGG/ancestor::* | 
-        //GGG/descendant::* | 
-        //GGG/following::* |
-        //GGG/preceding::* |
-        //GGG/self::*');
-ok(@nodes, 16);
-
-__DATA__
+my $x = XML::XPath.new(xml => q:to/ENDXML/);
 <AAA>
     <BBB>
         <CCC/>
@@ -58,3 +30,36 @@ __DATA__
         <DDD/>
     </CCC>
 </AAA>
+ENDXML
+
+my $set;
+$set = $x.find('//GGG/ancestor::*');
+is $set.elems, 4, '4 ancestors';
+
+$set = $x.find('//GGG/descendant::*');
+is $set.elems, 3, '3 descendants';
+
+$set = $x.find('//GGG/following::*');
+is $set.elems, 3, '3 following';
+is $set[0].value.name, 'VVV', '1st following is VVV';
+is $set[1].value.name, 'CCC', '2nd following is CCC';
+is $set[2].value.name, 'DDD', '3rd following is DDD';
+
+$set = $x.find('//GGG/preceding::*');
+is $set.elems, 5, '5 preceding';
+# document order: BBB not HHH
+is $set[0].value.name, 'BBB', 'first following is BBB';
+is $set[1].value.name, 'CCC', 'first following is CCC';
+is $set[2].value.name, 'ZZZ', 'first following is ZZZ';
+is $set[3].value.name, 'EEE', 'first following is EEE';
+is $set[4].value.name, 'HHH', 'first following is HHH';
+
+$set = $x.find('//GGG/self::*');
+is $set.elems, 1, '1 self';
+is $set[0].value.name, 'GGG', 'first following is GGG';
+
+$set = $x.find('//GGG/ancestor::*|//GGG/descendant::*|//GGG/following::*|//GGG/preceding::*|//GGG/self::*');
+is $set.elems, 16, '16 nodes summary';
+
+done-testing;
+
