@@ -21,13 +21,12 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
 
     method !evaluate-node(XML::XPath::Result::Node $node, Axis $axis --> XML::XPath::Result) {
         my $xml-node = $node.value;
-        my XML::XPath::Result $result;
+        my XML::XPath::Result $result = XML::XPath::Result::ResultList.new;
         given $axis {
             when 'self' {
-                $result = self!test-node($xml-node);
+                $result.add: self!test-node($xml-node);
             }
             when 'child' {
-                $result = XML::XPath::Result::ResultList.new;
                 if $xml-node.can('nodes') {
                     for $xml-node.nodes -> $child {
                         $result.add: self!test-node($child);
@@ -35,16 +34,13 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
                 }
             }
             when 'descendant' {
-                $result = XML::XPath::Result::ResultList.new;
                 self!walk-descendant($xml-node, $result);
             }
             when 'descendant-or-self' {
-                $result = XML::XPath::Result::ResultList.new;
                 $result.add: self!test-node($xml-node);
                 self!walk-descendant($xml-node, $result);
             }
             when 'attribute' {
-                $result = XML::XPath::Result::ResultList.new;
                 for $xml-node.attribs.kv -> $key, $val {
                     if $.value eq '*' or $.value eq $key {
                         $result.add($val);
@@ -57,18 +53,16 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
             when 'parent' {
                 my $parent = $xml-node.parent;
                 unless $parent ~~ XML::Document {
-                    $result = self!test-node($parent);
+                    $result.add: self!test-node($parent);
                 }
             }
             when 'ancestor' {
-                $result = XML::XPath::Result::ResultList.new;
                 while ($xml-node = $xml-node.parent) {
                     last if $xml-node ~~ XML::Document;
                     $result.add: self!test-node($xml-node);
                 }
             }
             when 'ancestor-or-self' {
-                $result = XML::XPath::Result::ResultList.new;
                 $result.add: self!test-node($xml-node);
                 while ($xml-node = $xml-node.parent) {
                     last if $xml-node ~~ XML::Document;
@@ -77,14 +71,12 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
             }
             when 'following-sibling' {
                 my @fs = self!get-following-siblings($xml-node);
-                $result = XML::XPath::Result::ResultList.new;
                 for @fs {
                     $result.add: self!test-node($_);
                 }
             }
             when 'following' {
                 my @fs = self!get-following($xml-node);
-                $result = XML::XPath::Result::ResultList.new;
                 for @fs {
                     $result.add: self!test-node($_);
                     self!walk-descendant($_, $result);
@@ -92,14 +84,12 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
             }
             when 'preceding-sibling' {
                 my @fs = self!get-preceding-siblings($xml-node);
-                $result = XML::XPath::Result::ResultList.new;
                 for @fs {
                     $result.add: self!test-node($_);
                 }
             }
             when 'preceding' {
                 my @fs = self!get-preceding($xml-node);
-                $result = XML::XPath::Result::ResultList.new;
                 for @fs {
                     $result.add: self!test-node($_);
                     self!walk-descendant($_, $result);
