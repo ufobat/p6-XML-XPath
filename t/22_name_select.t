@@ -1,18 +1,11 @@
+use v6.c;
+
 use Test;
-BEGIN { plan tests => 4 }
-
 use XML::XPath;
-ok(1);
 
-my $xp = XML::XPath->new(ioref => *DATA);
-ok($xp);
+plan 2;
 
-my @nodes;
-@nodes = $xp->findnodes('//*[name() = /AAA/SELECT]');
-ok(@nodes, 2);
-ok($nodes[0]->getName, "BBB");
-
-__DATA__
+my $x = XML::XPath.new(xml => q:to/ENDXML/);
 <AAA>
 <SELECT>BBB</SELECT>
 <BBB/>
@@ -21,3 +14,12 @@ __DATA__
 <BBB/>
 </DDD>
 </AAA>
+ENDXML
+
+my $set;
+$set = $x.find('//*[name()=/AAA/SELECT]');
+is $set.elems, 2, '2 nodes';
+is $set[0].value.name, 'BBB', 'name is BBB';
+is $set[1].value.name, 'BBB', 'name is BBB';
+
+done-testing;

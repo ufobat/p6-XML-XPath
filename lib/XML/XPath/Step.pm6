@@ -25,7 +25,7 @@ class XML::XPath::Step does XML::XPath::Evaluable {
             my $start-evaluation-list = $.is-absolute
             ?? self!get-resultlist-with-root($set)
             !! $set;
-            $result = $.test.evaluate($set, :$.axis, :$index).trim: :to-list(True);
+            $result = $.test.evaluate($start-evaluation-list, :$.axis, :$index).trim: :to-list(True);
         } else {
             die 'this should never happen';
         }
@@ -37,12 +37,16 @@ class XML::XPath::Step does XML::XPath::Evaluable {
             my $interim = XML::XPath::Result::ResultList.new;
             for $result.nodes.kv -> $index, $node {
                 my $predicate-result = $predicate.evaluate($result, :$index);
-                say "predicate-result $index";
-                say $predicate-result;
+
+                if ($predicate-result ~~ XML::XPath::Result::ResultList) and ($predicate-result.elems == 1) {
+                    $predicate-result = $predicate-result.trim
+                }
 
                 if $predicate-result ~~ XML::XPath::Result::Number {
                     $interim.add: $node if $predicate-result.value - 1 == $index;
                 } elsif $predicate-result ~~XML::XPath::Result::Boolean {
+                    $interim.add: $node if $predicate-result.Bool;
+                } elsif $predicate-result ~~XML::XPath::Result::String {
                     $interim.add: $node if $predicate-result.Bool;
                 } else {
                     for $predicate-result.nodes.kv -> $i, $node-result {
@@ -61,10 +65,12 @@ class XML::XPath::Step does XML::XPath::Evaluable {
 
     method !get-resultlist-with-root(XML::XPath::Result::ResultList $start) {
         die 'can not calculate a root node from an empty list' unless $start.elems > 0;
-        my $elem = $start[0].value;
-        my $doc = $elem ~~ XML::Document ?? $elem !! $elem.ownerDocument;
         my $rs = XML::XPath::Result::ResultList.new;
-        $rs.add: $doc;
+        for $start.nodes -> $node {
+            my $elem = $start[0].value;
+            my $doc = $elem ~~ XML::Document ?? $elem !! $elem.ownerDocument;
+            $rs.add: $doc;
+        }
         return $rs;
     }
 }
