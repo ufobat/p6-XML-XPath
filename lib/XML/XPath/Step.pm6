@@ -37,6 +37,8 @@ class XML::XPath::Step does XML::XPath::Evaluable {
             my $interim = XML::XPath::Result::ResultList.new;
             for $result.nodes.kv -> $index, $node {
                 my $predicate-result = $predicate.evaluate($result, :$index);
+                say "predicate";
+                say $predicate-result.perl;
 
                 if ($predicate-result ~~ XML::XPath::Result::ResultList) and ($predicate-result.elems == 1) {
                     $predicate-result = $predicate-result.trim

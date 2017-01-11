@@ -109,7 +109,9 @@ class XML::XPath::Actions {
             $last_expression = $expression;
             $first_expression = $expression unless $first_expression;
         }
-        self.mymake($/, $first_expression, level => 2);
+        # wrap it, so someone else can attach with an operator to it
+        my $made = XML::XPath::Expr.new(operand => $first_expression);
+        self.mymake($/, $made, level => 2);
     }
 
     method UnaryExpr($/) {

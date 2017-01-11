@@ -1,31 +1,11 @@
+use v6.c;
+
 use Test;
-BEGIN { plan tests => 5 }
-
 use XML::XPath;
-ok(1);
 
-my $xp = XML::XPath->new(ioref => *DATA);
-ok($xp);
+plan 3;
 
-my @nodes;
-@nodes = $xp->findnodes('//BBB[position() mod 2 = 0 ]');
-ok(@nodes, 4);
-
-@nodes = $xp->findnodes('//BBB
-        [ position() = floor(last() div 2 + 0.5) 
-            or
-          position() = ceiling(last() div 2 + 0.5) ]');
-
-ok(@nodes, 2);
-
-@nodes = $xp->findnodes('//CCC
-        [ position() = floor(last() div 2 + 0.5) 
-            or
-          position() = ceiling(last() div 2 + 0.5) ]');
-
-ok(@nodes, 1);
-
-__DATA__
+my $x = XML::XPath.new(debug => 1, xml => q:to/ENDXML/);
 <AAA>
     <BBB/>
     <BBB/>
@@ -39,3 +19,17 @@ __DATA__
     <CCC/>
     <CCC/>
 </AAA>
+ENDXML
+
+my $set;
+$set = $x.find('//BBB[position()mod2=0]');
+is $set.elems, 4, 'found 4 nodes';
+
+$set = $x.find('//BBB[position()=floor(last()div2+0.5)orposition()=ceiling(last()div2+0.5)]');
+is $set.elems, 2, 'found 2 nodes';
+
+$set = $x.find('//CCC[position()=floor(last()div2+0.5)orposition()=ceiling(last()div2+0.5)]');
+is $set.elems, 1, 'found 1 nodes';
+
+
+done-testing;

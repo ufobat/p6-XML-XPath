@@ -35,6 +35,11 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
         }
     }
 
+    method !fn-position(XML::XPath::Result::ResultList $set, Axis $axis, Int $index) {
+        my $result  = XML::XPath::Result::Number.new(value => $index);
+        return $result;
+    }
+
     method !fn-count(XML::XPath::Result::ResultList $set, Axis $axis, Int $index) {
         die 'functioncall count() requires one parameter' unless @.args.elems == 1;
         my $expr    = @.args[0];
