@@ -48,12 +48,6 @@ class XML::XPath::Result::ResultList does XML::XPath::Result {
             @.nodes.push: $node;
         }
     }
-    multi method add(XML::Document $document) {
-        my @nodes = ($document.root);
-        for @nodes -> $node {
-            self.add: $node
-        }
-    }
 
     method Str {
         @.nodes.Str;

@@ -171,39 +171,18 @@ class XML::XPath::Actions {
         self.mymake($/, $<Expr>.made);
     }
 
-    method AbsoluteLocationPath($/) {
-        my $axis = $/<StepOperator>.Str eq '/'
-        ?? 'self'
-        !! 'descendant-or-self';
-        my $step;
-        if $/<RelativeLocationPath>:exists {
-            $step      = $/<RelativeLocationPath>.made;
-            if not $step.axis.defined or $step.axis eq 'child' {
-                $step.axis = $axis;
-            }
-        } else {
-            $step = XML::XPath::Step.new(:$axis);
-        }
-        self.mymake($/, $step);
-    }
     method RelativeLocationPath($/) {
         my @tokens = $/<Step>;
-        my @operators = $/<StepOperator>;
         die 'at least 1 *Expr required' if @tokens.elems < 1;
-        my $last_step;
         my $first_step;
 
         for @tokens.kv -> $i, $token {
             my $step = $token.made;
-            if ($last_step) {
-                my $operator = @operators[$i-1].Str;
-                my $axis     = $operator eq '/'
-                ?? 'self'
-                !! 'descendant-or-self';
-                $last_step.next = XML::XPath::Step.new(:$axis, next => $step);
+            if ($first_step) {
+                $first_step.add-next($step);
+            } else {
+                $first_step = $step;
             }
-            $first_step = $step unless $first_step;
-            $last_step = $step;
         }
         self.mymake($/, $first_step);
     }
@@ -211,8 +190,15 @@ class XML::XPath::Actions {
         my $path;
         if $/<RelativeLocationPath>:exists {
             $path = $/<RelativeLocationPath>.made;
+
+            if $/<StepDelim>:exists {
+                $path.is-absolute = True;
+            }
         } else {
-            $path = $/<AbsoluteLocationPath>.made;
+            $path = XML::XPath::Step.new(
+                axis        => 'child',
+                is-absolute => True
+            );
         }
         self.mymake($/, $path);
     }
@@ -222,11 +208,12 @@ class XML::XPath::Actions {
             $pathexpr = $/<LocationPath>.made;
         } else {
             $pathexpr = $/<FilterExpr>.made;
-            if $/<StepOperator>:exists {
-                my $stepoperator = $/<StepOperator>.Str;
-                my $rlp = $/<RelativeLocationPath>.made;
-                $rlp.operator = $stepoperator;
-                $pathexpr.operand: $rlp;
+            if $/<StepDelim>:exists {
+                my $path = $/<RelativeLocationPath>.made;
+                $path.is-absolute = True;
+
+                $pathexpr.operator = '/';
+                $pathexpr.other-operand: $path;
             }
         }
         self.mymake($/, $pathexpr);
@@ -257,9 +244,14 @@ class XML::XPath::Actions {
                 my $axis = $/<AxisSpecifier>.substr(0,*-2);
                 $step = XML::XPath::Step.new(:$axis, :$test);
             }
+
+            my @predicates   = $/<Predicate>;
+            $step.predicates = @predicates>>.made;
+
+            if $/<StepDelim>:exists {
+                $step = XML::XPath::Step.new(axis => 'descendant-or-self', next => $step);
+            }
         }
-        my @predicates   = $/<Predicate>;
-        $step.predicates = @predicates>>.made;
         self.mymake($/, $step);
     }
     method NodeTest($/) {

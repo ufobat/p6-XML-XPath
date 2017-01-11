@@ -29,9 +29,8 @@ ENDXML
 
 
 my $set;
-# 10 because not self!
 $set = $x.find('/descendant::*');
-is $set.elems, 10, 'found 10 elements';
+is $set.elems, 11, 'found 11 elements';
 
 $set = $x.find('/AAA/BBB/descendant::*');
 is $set.elems, 4, 'found 4 elements';

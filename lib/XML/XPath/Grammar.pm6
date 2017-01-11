@@ -6,21 +6,19 @@ grammar XML::XPath::Grammar {
 
     # https://www.w3.org/TR/1999/REC-xpath-19991116/
     # [1]
-    token LocationPath {
-        <RelativeLocationPath>
-        | <AbsoluteLocationPath>
-    }
-
     # [2]
     # [10] token AbbreviatedAbsoluteLocationPath
-    token AbsoluteLocationPath {
-        <StepOperator> <RelativeLocationPath>?
+    token LocationPath {
+        <StepDelim> <RelativeLocationPath>
+        | <RelativeLocationPath>
+        | <StepDelim>
     }
+    token StepDelim { '/' }
 
     # [3]
     #token RelativeLocationPath {
     #    <Step>
-    #    | <RelativeLocationPath> x'/' <Step>
+    #    | <RelativeLocationPath> '/' <Step>
     #    | <AbbreviatedRelativeLocationPath>
     #}
     # [11]
@@ -29,13 +27,12 @@ grammar XML::XPath::Grammar {
     #}
     # rewrite wihtout infinite loop
     token RelativeLocationPath {
-        <Step>+  % <StepOperator>
+        <Step>+  % <StepDelim>
     }
-    token StepOperator { ['/' | '//'] }
 
     # [4]
     token Step {
-        <AxisSpecifier> <NodeTest> <Predicate>*
+        <StepDelim>? <AxisSpecifier> <NodeTest> <Predicate>*
         | <AbbreviatedStep>
     }
 
@@ -102,7 +99,7 @@ grammar XML::XPath::Grammar {
 
     # [19]
     token PathExpr {
-        <FilterExpr> [ <StepOperator> <RelativeLocationPath> ]?
+        <FilterExpr> [ <StepDelim> <RelativeLocationPath> ]?
         | <LocationPath>
     }
 

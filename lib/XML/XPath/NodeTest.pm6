@@ -27,10 +27,9 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
                 $result.add: self!test-node($xml-node);
             }
             when 'child' {
-                if $xml-node.can('nodes') {
-                    for $xml-node.nodes -> $child {
-                        $result.add: self!test-node($child);
-                    }
+                my @nodes = self!get-children($xml-node);
+                for @nodes -> $child {
+                    $result.add: self!test-node($child);
                 }
             }
             when 'descendant' {
@@ -142,9 +141,19 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
         return ();
     }
 
+    method !get-children(XML::Node $xml-node) {
+        my @nodes;
+        if $xml-node ~~ XML::Document {
+            @nodes.push: $xml-node.root;
+        } elsif $xml-node ~~ XML::Element {
+            @nodes.append: $xml-node.nodes;
+        }
+        return @nodes;
+    }
+
     method !walk-descendant(XML::Node $node, XML::XPath::Result::ResultList $result) {
-        return unless $node.can('nodes');
-        for $node.nodes -> $child {
+        my @nodes = self!get-children($node);
+        for @nodes -> $child {
             $result.add: self!test-node($child);
             self!walk-descendant($child, $result);
         }

@@ -9,10 +9,22 @@ class XML::XPath::Step does XML::XPath::Evaluable {
     has XML::XPath::NodeTest $.test = XML::XPath::NodeTest.new;
     has @.predicates;
     has XML::XPath::Step $.next is rw;
+    has Bool $.is-absolute is rw = False;
+
+    method add-next(XML::XPath::Step $step) {
+        if $.next {
+            $.next.add-next($step);
+        } else {
+            $.next = $step;
+        }
+    }
 
     method evaluate(XML::XPath::Result::ResultList $set, Axis :$axis = 'self', Int :$index) {
         my XML::XPath::Result $result;
         if $.axis {
+            my $start-evaluation-list = $.is-absolute
+            ?? self!get-resultlist-with-root($set)
+            !! $set;
             $result = $.test.evaluate($set, :$.axis, :$index).trim: :to-list(True);
         } else {
             die 'this should never happen';
@@ -25,7 +37,7 @@ class XML::XPath::Step does XML::XPath::Evaluable {
             my $interim = XML::XPath::Result::ResultList.new;
             for $result.nodes.kv -> $index, $node {
                 my $predicate-result = $predicate.evaluate($result, :$index);
-                say "predicate-result";
+                say "predicate-result $index";
                 say $predicate-result;
 
                 if $predicate-result ~~ XML::XPath::Result::Number {
@@ -45,5 +57,14 @@ class XML::XPath::Step does XML::XPath::Evaluable {
             $result = $.next.evaluate($result);
         }
         return $result;
+    }
+
+    method !get-resultlist-with-root(XML::XPath::Result::ResultList $start) {
+        die 'can not calculate a root node from an empty list' unless $start.elems > 0;
+        my $elem = $start[0].value;
+        my $doc = $elem ~~ XML::Document ?? $elem !! $elem.ownerDocument;
+        my $rs = XML::XPath::Result::ResultList.new;
+        $rs.add: $doc;
+        return $rs;
     }
 }
