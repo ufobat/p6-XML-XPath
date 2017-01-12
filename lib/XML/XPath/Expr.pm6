@@ -3,7 +3,12 @@ use XML::XPath::Result::ResultList;
 use XML::XPath::Evaluable;
 use XML::XPath::Types;
 use XML::XPath::ExprOperator::Equal;
+use XML::XPath::ExprOperator::Mod;
+use XML::XPath::ExprOperator::Or;
 use XML::XPath::ExprOperator::Pipe;
+use XML::XPath::ExprOperator::Plus;
+use XML::XPath::ExprOperator::Minus;
+use XML::XPath::ExprOperator::Div;
 use XML::XPath::ExprOperator::SmallerThan;
 use XML::XPath::ExprOperator::GreaterThan;
 
@@ -35,7 +40,7 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
             $result = $.operand.evaluate($set, :$axis, :$index);
         } elsif ($.operand ~~ Str) {
             $result = XML::XPath::Result::String.new: value => $.operand;
-        } elsif ($.operand ~~ Int) {
+        } elsif ($.operand ~~ Real) {
             $result = XML::XPath::Result::Number.new: value => $.operand;
         } else {
             # this should never happen!

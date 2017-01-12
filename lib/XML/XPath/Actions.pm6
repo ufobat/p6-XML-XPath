@@ -150,7 +150,7 @@ class XML::XPath::Actions {
         } elsif $/<Literal>:exists {
             $expression.operand = $/<Literal>.made;
         } elsif $/<Number>:exists {
-            my $value = $/<Number>.Int;
+            my $value = $/<Number>.Real;
             $expression.operand = $value;
         } else  {
             $expression.operand = $/<FunctionCall>.made;

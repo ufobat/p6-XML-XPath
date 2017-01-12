@@ -44,7 +44,6 @@ class XML::XPath {
         my $match          = XML::XPath::Grammar.parse($xpath, :$actions);
         say $match if $.debug;
         my $parsed-xpath   = $match.ast;
-        say $parsed-xpath;
         return $parsed-xpath;
     }
 }

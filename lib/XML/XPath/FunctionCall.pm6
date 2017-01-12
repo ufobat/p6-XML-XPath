@@ -36,6 +36,7 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
     }
 
     method !fn-position(XML::XPath::Result::ResultList $set, Axis $axis, Int $index) {
+        die 'functioncall position() requires no parameter' unless @.args.elems == 0;
         my $result  = XML::XPath::Result::Number.new(value => $index);
         return $result;
     }
@@ -92,6 +93,27 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
         } else {
             return $converter.($interim);
         }
+    }
+    method !fn-floor(XML::XPath::Result::ResultList $set, Axis $axis, Int $index) {
+        die 'functioncall floor() requires no parameter' unless @.args.elems == 1;
+        my $converter = sub (XML::XPath::Result $r){
+            XML::XPath::Result::Number.new(value => $r.value.floor)
+        };
+        self!help-one-arg-string($set, $axis, $index, $converter);
+    }
+    method !fn-ceiling(XML::XPath::Result::ResultList $set, Axis $axis, Int $index) {
+        die 'functioncall floor() requires no parameter' unless @.args.elems == 1;
+        my $converter = sub (XML::XPath::Result $r){
+            XML::XPath::Result::Number.new(value => $r.value.ceiling)
+        };
+        self!help-one-arg-string($set, $axis, $index, $converter);
+    }
+    method !fn-round(XML::XPath::Result::ResultList $set, Axis $axis, Int $index) {
+        die 'functioncall floor() requires no parameter' unless @.args.elems == 1;
+        my $converter = sub (XML::XPath::Result $r){
+            XML::XPath::Result::Number.new(value => $r.value.round)
+        };
+        self!help-one-arg-string($set, $axis, $index, $converter);
     }
     method !fn-string-length(XML::XPath::Result::ResultList $set, Axis $axis, Int $index) {
         die 'functioncall normalize-space() reqires one parameter' unless @.args.elems == 1;
