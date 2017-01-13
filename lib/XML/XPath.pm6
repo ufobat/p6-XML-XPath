@@ -7,6 +7,7 @@ use XML::XPath::Grammar;
 class XML::XPath {
     has $.document;
     has $.debug is rw = 0;
+    has %.registered-namespaces is rw;
 
     submethod BUILD(:$file, :$xml, :$document) {
         my $doc;
@@ -24,6 +25,7 @@ class XML::XPath {
     }
 
     method find(Str $xpath, Bool :$to-list) {
+        my %*NAMESPACES = %.registered-namespaces;
         my $parsed-xpath   = self.parse-xpath($xpath);
         my $start-nodeset  = XML::XPath::Result::ResultList.new();
         $start-nodeset.add: $.document;
@@ -45,5 +47,13 @@ class XML::XPath {
         say $match if $.debug;
         my $parsed-xpath   = $match.ast;
         return $parsed-xpath;
+    }
+
+    method set-namespace(Pair $ns) {
+        %.registered-namespaces{ $ns.key } = $ns.value;
+    }
+
+    method clear-namespaces {
+        %.registered-namespaces = ();
     }
 }

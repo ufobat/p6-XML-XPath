@@ -168,20 +168,24 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
                 } elsif $.value eq '*' {
                     $take = $node ~~ XML::Element;
                 } else {
-                    my $name = $.value;
-                    if $.value.contains(':') {
-                        my @values = $.value.split(/':'/);
-                        my $ns = @values[0];
-
-                        # test NS
-                        if $node ~~ XML::Element {
-                            # TODO how does ns in XML work?
-                            X::NYI.new(feature => 'namespaces in nodetests').throw;
-                        }
-                        $name = @values[1];
-                    }
                     if $node ~~ XML::Element {
-                        $take = $node.name eq $name;
+                        if $.value.contains(':') {
+                            my @values = $.value.split(/':'/);
+                            my $ns     = @values[0];
+                            my $name   = @values[1];
+                            if %*NAMESPACES{ $ns }:exists {
+                                $node.name    ~~ / [ (<-[:]>+) ':' ]?  (<-[:]>+)/;
+                                my $node-ns   = $/[0];
+                                my $node-name = $/[1];
+                                my $uri       = $node-ns ?? $node.nsURI($node-ns) !! $node.nsURI();
+                                $take = $uri eq %*NAMESPACES{ $ns } && $node-name eq $name;
+                                say "Namespace $ns exists TAKE($take) node {$node.name}, $uri is $uri ";
+                            } else {
+                                $take = $node.name eq $.value;
+                            }
+                        } else {
+                            $take = $node.name eq $.value;
+                        }
                     }
                 }
             }

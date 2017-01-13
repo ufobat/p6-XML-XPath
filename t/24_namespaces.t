@@ -1,44 +1,11 @@
+use v6.c;
+
 use Test;
-BEGIN { plan tests => 9 }
-
 use XML::XPath;
-ok(1);
 
-my $xp = XML::XPath->new(ioref => *DATA);
-ok($xp);
+plan 5;
 
-my @nodes;
-
-# Don't set namespace prefixes - uses element context namespaces
-
-@nodes = $xp->findnodes('//foo:foo'); # should find foobar.com foos
-ok(@nodes, 3);
-
-@nodes = $xp->findnodes('//goo:foo'); # should find no foos
-ok(@nodes, 0);
-
-@nodes = $xp->findnodes('//foo'); # should find default NS foos
-ok(@nodes, 2);
-
-# Set namespace mappings.
-
-$xp->set_namespace("foo" => "flubber.example.com");
-$xp->set_namespace("goo" => "foobar.example.com");
-
-# warn "TEST 6\n";
-@nodes = $xp->findnodes('//foo:foo'); # should find flubber.com foos
-# warn "found: ", scalar @nodes, "\n";
-ok(@nodes, 2);
-
-@nodes = $xp->findnodes('//goo:foo'); # should find foobar.com foos
-ok(@nodes, 3);
-
-@nodes = $xp->findnodes('//foo'); # should find default NS foos
-ok(@nodes, 2);
-
-ok($xp->findvalue('//attr:node/@attr:findme'), 'someval');
-
-__DATA__
+my $x = XML::XPath.new(debug => 1, xml => q:to/ENDXML/);
 <xml xmlns:foo="foobar.example.com"
     xmlns="flubber.example.com">
     <foo>
@@ -54,3 +21,37 @@ __DATA__
     <attr:node xmlns:attr="attribute.example.com"
         attr:findme="someval"/>
 </xml>
+ENDXML
+
+# Don't set namespace prefixes - uses element context namespaces
+my $set;
+
+# should find foobar.com foos
+$set = $x.find('//foo:foo');
+is $set.elems, 3, 'found 3 nodes';
+
+# should find no foos
+# need a fix of results::*
+# $set = $x.find('//goo:foo');
+# is $set.elems, 0, 'found 0 nodes';
+
+# should find default NS foos
+$set = $x.find('//foo');
+is $set.elems, 2, 'found 2 nodes';
+
+$x.set-namespace: 'foo' => "flubber.example.com";
+$x.set-namespace: 'goo' => "foobar.example.com";
+
+# should find flubber.com foos
+$set = $x.find('//foo:foo');
+is $set.elems, 2, 'found 2 nodes';
+
+# should find foobar.com foos
+$set = $x.find('//goo:foo');
+is $set.elems, 3, 'found 3 nodes';
+
+# should find default NS foos
+$set = $x.find('//foo');
+is $set.elems, 2, 'found 2 nodes';
+
+done-testing;
