@@ -146,7 +146,7 @@ class XML::XPath::Actions {
         if $/<VariableReference>:exists {
             X::NYI.new(feature => 'PrimaryExpr - VariableReference').throw;
         } elsif $/<Expr>:exists {
-            X::NYI.new(feature => 'PrimaryExpr - Expr').throw;
+            $expression.operand = $/<Expr>.made;
         } elsif $/<Literal>:exists {
             $expression.operand = $/<Literal>.made;
         } elsif $/<Number>:exists {
@@ -231,21 +231,15 @@ class XML::XPath::Actions {
         }
         else {
             my $test = $/<NodeTest>.made;
-
+            my $axis;
             if $/<AxisSpecifier> eq '' {
-                $step = XML::XPath::Step.new(
-                    axis => 'child',
-                    :$test,
-                );
+                $axis = 'child';
             } elsif $/<AxisSpecifier> eq '@' {
-                $step = XML::XPath::Step.new(
-                    axis => 'attribute',
-                    :$test,
-                );
+                $axis = 'attribute';
             } else {
-                my $axis = $/<AxisSpecifier>.substr(0,*-2);
-                $step = XML::XPath::Step.new(:$axis, :$test);
+                $axis = $/<AxisSpecifier>.substr(0,*-2);
             }
+            $step = XML::XPath::Step.new(:$axis, :$test);
 
             my @predicates   = $/<Predicate>;
             $step.predicates = @predicates>>.made;
