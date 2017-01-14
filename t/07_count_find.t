@@ -3,7 +3,7 @@ use v6.c;
 use Test;
 use XML::XPath;
 
-plan 9;
+plan 10;
 
 my $x = XML::XPath.new(xml => q:to/ENDXML/);
 <AAA>
@@ -26,7 +26,7 @@ is $set, False, 'found 3 nodes';
 
 $set = $x.find('//*[count(BBB)=2]', :to-list(True));
 is $set.nodes.elems, 1 , 'found one node';
-#is $set.nodes[0].name, 'DDD', 'node name is BBB';
+is $set.nodes[0].value.name, 'DDD', 'node name is BBB';
 
 $set = $x.find('//*[count(*)=2]');
 is $set.nodes.elems, 2 , 'found two nodes';
