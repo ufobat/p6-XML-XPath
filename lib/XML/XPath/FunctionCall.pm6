@@ -118,7 +118,9 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
     method !fn-string-length(XML::XPath::Result::ResultList $set, Axis $axis, Int $index) {
         die 'functioncall normalize-space() reqires one parameter' unless @.args.elems == 1;
         my $converter = sub (XML::XPath::Result $r){
-            XML::XPath::Result::Number.new(value => $r.Str.chars)
+            return $r.defined
+            ?? XML::XPath::Result::Number.new(value => $r.defined ?? $r.Str.chars !! 0)
+            !! XML::XPath::Result::Number:U;
         };
         self!help-one-arg-string($set, $axis, $index, $converter);
     }

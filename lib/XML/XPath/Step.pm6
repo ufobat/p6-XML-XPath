@@ -60,7 +60,13 @@ class XML::XPath::Step does XML::XPath::Evaluable {
         }
 
         if $.next {
-            $result = $.next.evaluate($result);
+            my $next-step-result = XML::XPath::Result::ResultList.new;
+            for $result.nodes -> $node {
+                my $interim = XML::XPath::Result::ResultList.new;
+                $interim.add: $node;
+                $next-step-result.add: $.next.evaluate($interim);
+            }
+            $result = $next-step-result;
         }
         return $result;
     }
