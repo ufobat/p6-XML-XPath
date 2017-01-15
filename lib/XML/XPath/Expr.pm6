@@ -18,11 +18,11 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
     has $.other-operand is rw;
     has @.predicates;
 
-    method evaluate(XML::XPath::Result::ResultList $set, Axis :$axis = 'self', Int :$index) {
-        return self!evaluate($set, $axis, $index);
-    }
-    method !evaluate($set, Axis $axis, Int $index,) {
+    method evaluate(XML::XPath::Result::ResultList $set, Int :$index) {
         my $result;
+
+        # todo proove of TODO
+        die if $set.elems > 1 && not( $index.defined );
 
         if ($.operand ~~ XML::XPath::Evaluable)
         and $.operator
@@ -30,14 +30,14 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
 
             try {
                 my $operator-strategy = ::('XML::XPath::ExprOperator::' ~ $.operator).new;
-                $result = $operator-strategy.invoke(self, $set, :$axis, :$index);
+                $result = $operator-strategy.invoke(self, $set, :$index);
                 CATCH {
                     say "caught $_";
                 }
             }
 
         } elsif ($.operand ~~ XML::XPath::Evaluable) {
-            $result = $.operand.evaluate($set, :$axis, :$index);
+            $result = $.operand.evaluate($set, :$index);
         } elsif ($.operand ~~ Str) {
             $result = XML::XPath::Result::String.new: value => $.operand;
         } elsif ($.operand ~~ Real) {

@@ -22,12 +22,6 @@ class XML::XPath::Result::ResultList does XML::XPath::Result {
     multi method add(XML::Node $value) {
         self.add: XML::XPath::Result::Node.new(:$value);
     }
-    multi method add() {
-        self.add: XML::XPath::Result:U;
-    }
-    multi method add(XML::XPath::Result:U $value) {
-        @.nodes.push: $value;
-    }
     multi method add(XML::XPath::Result::String $value) {
         @.nodes.push: $value;
     }
@@ -40,10 +34,13 @@ class XML::XPath::Result::ResultList does XML::XPath::Result {
     multi method add(XML::XPath::Result::Boolean $value) {
         @.nodes.push: $value;
     }
-    multi method add(XML::XPath::Result::ResultList $other where {$other.elems == 0}) {
-        self.add() if $other.elems == 0;
+    multi method add(XML::XPath::Result::ResultList $other) {
+        die "append"; # because of refactoring
+        for $other.nodes -> $node {
+            @.nodes.push: $node;
+        }
     }
-    multi method add(XML::XPath::Result::ResultList $other where {$other.elems > 0}) {
+    multi method append(XML::XPath::Result::ResultList $other) {
         for $other.nodes -> $node {
             @.nodes.push: $node;
         }

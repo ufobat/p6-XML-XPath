@@ -7,9 +7,9 @@ use XML::XPath::Types;
 role XML::XPath::InfixExprOperatorPerElement {
     method check(XML::XPath::Result $a, XML::XPath::Result $b) { ...}
 
-    method invoke($expr, XML::XPath::Result::ResultList $set, Axis :$axis = 'self', Int :$index) {
-        my $first-set = $expr.operand.evaluate($set, :$axis, :$index);
-        my $other-set = $expr.other-operand.evaluate($set, :$axis, :$index);
+    method invoke($expr, XML::XPath::Result::ResultList $set, Int :$index) {
+        my $first-set = $expr.operand.evaluate($set, :$index);
+        my $other-set = $expr.other-operand.evaluate($set, :$index);
         return self.op-result-helper($first-set, $other-set);
     }
 

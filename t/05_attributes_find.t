@@ -21,6 +21,7 @@ is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
 is $set.nodes[1].value.name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[@name]');
+say $set.elems;
 isa-ok $set, XML::XPath::Result::Node, 'found one node';
 is $set.value.name, 'BBB', 'node name is BBB';
 

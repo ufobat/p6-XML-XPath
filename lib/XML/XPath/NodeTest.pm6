@@ -3,24 +3,11 @@ use XML::XPath::Result::ResultList;
 use XML::XPath::Evaluable;
 use XML::XPath::Types;
 
-class XML::XPath::NodeTest does XML::XPath::Evaluable {
+class XML::XPath::NodeTest {
     has Type $.type = "node";
     has Str $.value;
 
-    method evaluate(XML::XPath::Result::ResultList $set, Axis :$axis = 'self', Int :$index) {
-        if $index.defined {
-            return self!evaluate-node($set[$index], $axis);
-        } else {
-            my XML::XPath::Result::ResultList $result .= new;
-            for $set.nodes -> $node {
-                $result.add: self!evaluate-node($node, $axis);
-            }
-            return $result;
-        }
-    }
-
-    method !evaluate-node(XML::XPath::Result::Node $node, Axis $axis --> XML::XPath::Result) {
-        my $xml-node = $node.value;
+    method evaluate-node(XML::Node $xml-node is copy, Axis $axis --> XML::XPath::Result::ResultList) {
         my XML::XPath::Result $result = XML::XPath::Result::ResultList.new;
         given $axis {
             when 'self' {
@@ -44,7 +31,7 @@ class XML::XPath::NodeTest does XML::XPath::Evaluable {
                     if $.value eq '*' or $.value eq $key {
                         $result.add($val);
                     } else {
-                        $result.add();
+                        #$result.add();
                     }
                 }
                 $result = $result.trim: :to-list(True);

@@ -19,17 +19,31 @@ class XML::XPath::Step does XML::XPath::Evaluable {
         }
     }
 
-    method evaluate(XML::XPath::Result::ResultList $set, Axis :$axis = 'self', Int :$index) {
-        my XML::XPath::Result $result;
-        if $.axis {
-            my $start-evaluation-list = $.is-absolute
-            ?? self!get-resultlist-with-root($set)
-            !! $set;
-            $result = $.test.evaluate($start-evaluation-list, :$.axis, :$index).trim: :to-list(True);
-        } else {
-            die 'this should never happen';
+    method evaluate(XML::XPath::Result::ResultList $set, Int :$index) {
+        my XML::XPath::Result::ResultList $result .= new;
+        my $start-evaluation-list = $.is-absolute
+        ?? self!get-resultlist-with-root($set)
+        !! $set;
+
+        # this can be removed when predicate invokation works. TODO
+        if $index.defined {
+            my $elem = $start-evaluation-list[$index];
+            $start-evaluation-list = XML::XPath::Result::ResultList.new();
+            $start-evaluation-list.add: $elem;
+        }
+        
+        # this can be removed when predicate invokation works. TODO
+        #say "step with test axis = $.axis test =  ", $.test.type , " ", $.test.value;
+        for $start-evaluation-list.nodes -> $node {
+            #say "node -> ", $node.perl;
+            my $tmp = $.test.evaluate-node($node.value, $.axis).trim: :to-list(True);
+            #say "adding ", $tmp;
+            $result.append( $tmp );
         }
 
+        # todo proove of TODO
+        die if $start-evaluation-list.elems > 1;
+        
         for @.predicates -> $predicate {
             # a predicate should basically evaluate to a ResultList of True and False
             # or Number
@@ -60,11 +74,14 @@ class XML::XPath::Step does XML::XPath::Evaluable {
         }
 
         if $.next {
+            #say "!! calling next step with ", $result.elems;
+            
             my $next-step-result = XML::XPath::Result::ResultList.new;
             for $result.nodes -> $node {
+                #say "!! node", $node.perl;
                 my $interim = XML::XPath::Result::ResultList.new;
                 $interim.add: $node;
-                $next-step-result.add: $.next.evaluate($interim);
+                $next-step-result.append: $.next.evaluate($interim);
             }
             $result = $next-step-result;
         }
