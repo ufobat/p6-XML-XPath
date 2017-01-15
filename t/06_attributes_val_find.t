@@ -15,15 +15,15 @@ ENDXML
 
 my $set;
 $set = $x.find('//BBB[@id="b1"]');
-isa-ok $set, XML::XPath::Result::Node, 'found one node';
-is $set.value.name, 'BBB', 'node name is BBB';
+does-ok $set, XML::Node, 'found one node';
+is $set.name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[@name="bbb"]', :to-list(True));
 is $set.nodes.elems, 1 , 'found one attrib';
-is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
+is $set.nodes[0].name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[normalize-space(@name)="bbb"]');
 is $set.nodes.elems, 2 , 'found one node';
-is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
+is $set.nodes[0].name, 'BBB', 'node name is BBB';
 
 done-testing;

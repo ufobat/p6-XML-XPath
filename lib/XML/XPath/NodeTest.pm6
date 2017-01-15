@@ -8,22 +8,22 @@ class XML::XPath::NodeTest {
     has Str $.value;
 
     method evaluate-node(XML::Node $xml-node is copy, Axis $axis --> XML::XPath::Result::ResultList) {
-        my XML::XPath::Result $result = XML::XPath::Result::ResultList.new;
+        my $result = XML::XPath::Result::ResultList.new;
         given $axis {
             when 'self' {
-                $result.add: self!test-node($xml-node);
+                $result.add: $xml-node if self!test-node($xml-node);
             }
             when 'child' {
                 my @nodes = self!get-children($xml-node);
                 for @nodes -> $child {
-                    $result.add: self!test-node($child);
+                    $result.add: $child if self!test-node($child);
                 }
             }
             when 'descendant' {
                 self!walk-descendant($xml-node, $result);
             }
             when 'descendant-or-self' {
-                $result.add: self!test-node($xml-node);
+                $result.add: $xml-node if self!test-node($xml-node);
                 self!walk-descendant($xml-node, $result);
             }
             when 'attribute' {
@@ -39,45 +39,45 @@ class XML::XPath::NodeTest {
             when 'parent' {
                 my $parent = $xml-node.parent;
                 unless $parent ~~ XML::Document {
-                    $result.add: self!test-node($parent);
+                    $result.add: $parent if self!test-node($parent);
                 }
             }
             when 'ancestor' {
                 while ($xml-node = $xml-node.parent) {
                     last if $xml-node ~~ XML::Document;
-                    $result.add: self!test-node($xml-node);
+                    $result.add: $xml-node if self!test-node($xml-node);
                 }
             }
             when 'ancestor-or-self' {
-                $result.add: self!test-node($xml-node);
+                $result.add: $xml-node if self!test-node($xml-node);
                 while ($xml-node = $xml-node.parent) {
                     last if $xml-node ~~ XML::Document;
-                    $result.add: self!test-node($xml-node);
+                    $result.add: $xml-node if self!test-node($xml-node);
                 }
             }
             when 'following-sibling' {
                 my @fs = self!get-following-siblings($xml-node);
                 for @fs {
-                    $result.add: self!test-node($_);
+                    $result.add: $_ if self!test-node($_);
                 }
             }
             when 'following' {
                 my @fs = self!get-following($xml-node);
                 for @fs {
-                    $result.add: self!test-node($_);
+                    $result.add: $_ if self!test-node($_);
                     self!walk-descendant($_, $result);
                 }
             }
             when 'preceding-sibling' {
                 my @fs = self!get-preceding-siblings($xml-node);
                 for @fs {
-                    $result.add: self!test-node($_);
+                    $result.add: $_ if self!test-node($_);
                 }
             }
             when 'preceding' {
                 my @fs = self!get-preceding($xml-node);
                 for @fs {
-                    $result.add: self!test-node($_);
+                    $result.add: $_ if self!test-node($_);
                     self!walk-descendant($_, $result);
                 }
             }
@@ -141,12 +141,12 @@ class XML::XPath::NodeTest {
     method !walk-descendant(XML::Node $node, XML::XPath::Result::ResultList $result) {
         my @nodes = self!get-children($node);
         for @nodes -> $child {
-            $result.add: self!test-node($child);
+            $result.add: $child if self!test-node($child);
             self!walk-descendant($child, $result);
         }
     }
 
-    method !test-node(XML::Node $node --> XML::XPath::Result::Node) {
+    method !test-node(XML::Node $node --> Bool) {
         my Bool $take = False;
         given $.type {
             when 'node' {
@@ -190,7 +190,6 @@ class XML::XPath::NodeTest {
                 }
             }
         }
-        return XML::XPath::Result::Node.new( value => $node) if $take;
-        return XML::XPath::Result::Node:U;
+        return $take;
     }
 }

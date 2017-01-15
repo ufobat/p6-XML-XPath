@@ -30,8 +30,8 @@ $set = $x.find('/doc/text()');
 is $set.elems, 2, 'found 2 text nodes';
 
 # XML trimms the nodes, thats why the $set[0].Str is not giving the right result
-is $set[0].value.text, "\n  ", 'first text is correct';
-is $set[1].value.text, "\n", 'first text is correct';
+is $set[0].text, "\n  ", 'first text is correct';
+is $set[1].text, "\n", 'first text is correct';
 
 
 
@@ -42,8 +42,8 @@ is $set[1], 1, 'XML trimmed string length is 1';
 
 $set = $x.find('/doc/para/text()');
 is $set.elems, 2, 'found 2 text nodes';
-is $set[0].value.text, "para one has ", 'first text is correct';
-is $set[1].value.text, " text", 'first text is correct';
+is $set[0].text, "para one has ", 'first text is correct';
+is $set[1].text, " text", 'first text is correct';
 
 $set = $x.find('string-length(/doc/para/text())');
 is $set[0], 13, 'XML trimmed string length is 1';

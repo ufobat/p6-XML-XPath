@@ -1,5 +1,4 @@
 use XML;
-use XML::XPath::Result;
 use XML::XPath::Result::ResultList;
 use XML::XPath::Actions;
 use XML::XPath::Grammar;

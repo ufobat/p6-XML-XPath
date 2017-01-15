@@ -19,7 +19,7 @@ ENDXML
 my $set;
 $set = $x.find('//*[name()=/AAA/SELECT]');
 is $set.elems, 2, '2 nodes';
-is $set[0].value.name, 'BBB', 'name is BBB';
-is $set[1].value.name, 'BBB', 'name is BBB';
+is $set[0].name, 'BBB', 'name is BBB';
+is $set[1].name, 'BBB', 'name is BBB';
 
 done-testing;

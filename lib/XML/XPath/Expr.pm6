@@ -39,9 +39,9 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
         } elsif ($.operand ~~ XML::XPath::Evaluable) {
             $result = $.operand.evaluate($set, :$index);
         } elsif ($.operand ~~ Str) {
-            $result = XML::XPath::Result::String.new: value => $.operand;
-        } elsif ($.operand ~~ Real) {
-            $result = XML::XPath::Result::Number.new: value => $.operand;
+            $result = $.operand;
+        } elsif ($.operand ~~ Numeric) {
+            $result = $.operand;
         } else {
             # this should never happen!
             die 'WHAT - this should never happen';

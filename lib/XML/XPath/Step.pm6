@@ -36,7 +36,7 @@ class XML::XPath::Step does XML::XPath::Evaluable {
         #say "step with test axis = $.axis test =  ", $.test.type , " ", $.test.value;
         for $start-evaluation-list.nodes -> $node {
             #say "node -> ", $node.perl;
-            my $tmp = $.test.evaluate-node($node.value, $.axis).trim: :to-list(True);
+            my $tmp = $.test.evaluate-node($node, $.axis).trim: :to-list(True);
             #say "adding ", $tmp;
             $result.append( $tmp );
         }
@@ -58,11 +58,11 @@ class XML::XPath::Step does XML::XPath::Evaluable {
                     $predicate-result = $predicate-result.trim
                 }
 
-                if $predicate-result ~~ XML::XPath::Result::Number {
-                    $interim.add: $node if $predicate-result.value - 1 == $index;
-                } elsif $predicate-result ~~XML::XPath::Result::Boolean {
+                if $predicate-result ~~ Numeric and $predicate-result !~~ Stringy and $predicate-result !~~ Bool {
+                    $interim.add: $node if $predicate-result - 1 == $index;
+                } elsif $predicate-result ~~ Bool {
                     $interim.add: $node if $predicate-result.Bool;
-                } elsif $predicate-result ~~XML::XPath::Result::String {
+                } elsif $predicate-result ~~ Str {
                     $interim.add: $node if $predicate-result.Bool;
                 } else {
                     for $predicate-result.nodes.kv -> $i, $node-result {
@@ -92,7 +92,7 @@ class XML::XPath::Step does XML::XPath::Evaluable {
         die 'can not calculate a root node from an empty list' unless $start.elems > 0;
         my $rs = XML::XPath::Result::ResultList.new;
         for $start.nodes -> $node {
-            my $elem = $start[0].value;
+            my $elem = $start[0];
             my $doc = $elem ~~ XML::Document ?? $elem !! $elem.ownerDocument;
             $rs.add: $doc;
         }

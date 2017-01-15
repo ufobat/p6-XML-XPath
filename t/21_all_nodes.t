@@ -41,22 +41,22 @@ is $set.elems, 3, '3 descendants';
 
 $set = $x.find('//GGG/following::*');
 is $set.elems, 3, '3 following';
-is $set[0].value.name, 'VVV', '1st following is VVV';
-is $set[1].value.name, 'CCC', '2nd following is CCC';
-is $set[2].value.name, 'DDD', '3rd following is DDD';
+is $set[0].name, 'VVV', '1st following is VVV';
+is $set[1].name, 'CCC', '2nd following is CCC';
+is $set[2].name, 'DDD', '3rd following is DDD';
 
 $set = $x.find('//GGG/preceding::*');
 is $set.elems, 5, '5 preceding';
 # document order: BBB not HHH
-is $set[0].value.name, 'BBB', 'first following is BBB';
-is $set[1].value.name, 'CCC', 'first following is CCC';
-is $set[2].value.name, 'ZZZ', 'first following is ZZZ';
-is $set[3].value.name, 'EEE', 'first following is EEE';
-is $set[4].value.name, 'HHH', 'first following is HHH';
+is $set[0].name, 'BBB', 'first following is BBB';
+is $set[1].name, 'CCC', 'first following is CCC';
+is $set[2].name, 'ZZZ', 'first following is ZZZ';
+is $set[3].name, 'EEE', 'first following is EEE';
+is $set[4].name, 'HHH', 'first following is HHH';
 
 $set = $x.find('//GGG/self::*');
-is $set.elems, 1, '1 self';
-is $set[0].value.name, 'GGG', 'first following is GGG';
+does-ok $set , XML::Node, '1 self';
+is $set.name, 'GGG', 'first following is GGG';
 
 $set = $x.find('//GGG/ancestor::*|//GGG/descendant::*|//GGG/following::*|//GGG/preceding::*|//GGG/self::*');
 is $set.elems, 16, '16 nodes summary';

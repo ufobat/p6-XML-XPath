@@ -26,15 +26,15 @@ is $set, False, 'found 3 nodes';
 
 $set = $x.find('//*[count(BBB)=2]', :to-list(True));
 is $set.nodes.elems, 1 , 'found one node';
-is $set.nodes[0].value.name, 'DDD', 'node name is BBB';
+is $set.nodes[0].name, 'DDD', 'node name is BBB';
 
 $set = $x.find('//*[count(*)=2]');
 is $set.nodes.elems, 2 , 'found two nodes';
-is $set.nodes[0].value.name, 'DDD', 'node name is DDD';
-is $set.nodes[1].value.name, 'EEE', 'node name is EEE';
+is $set.nodes[0].name, 'DDD', 'node name is DDD';
+is $set.nodes[1].name, 'EEE', 'node name is EEE';
 
 $set = $x.find('//*[count(*)=3]', :to-list(True));
 is $set.nodes.elems, 1 , 'found one node';
-is $set.nodes[0].value.name, 'CCC', 'node name is CCC';
+is $set.nodes[0].name, 'CCC', 'node name is CCC';
 
 done-testing;

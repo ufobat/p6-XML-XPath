@@ -1,11 +1,10 @@
 use v6.c;
 
-use XML::XPath::Result;
 use XML::XPath::Result::ResultList;
 use XML::XPath::Types;
 
 role XML::XPath::InfixExprOperatorPerElement {
-    method check(XML::XPath::Result $a, XML::XPath::Result $b) { ...}
+    method check($a, $b) { ...}
 
     method invoke($expr, XML::XPath::Result::ResultList $set, Int :$index) {
         my $first-set = $expr.operand.evaluate($set, :$index);
@@ -13,11 +12,11 @@ role XML::XPath::InfixExprOperatorPerElement {
         return self.op-result-helper($first-set, $other-set);
     }
 
-    multi method op-result-helper(XML::XPath::Result $one, XML::XPath::Result $another) {
+    multi method op-result-helper($one, $another) {
         self.check($one, $another);
     }
 
-    multi method op-result-helper(XML::XPath::Result::ResultList $one, XML::XPath::Result $another) {
+    multi method op-result-helper(XML::XPath::Result::ResultList $one, $another) {
         my $result = XML::XPath::Result::ResultList.new;
         for $one.nodes -> $node {
             $result.add: self.check($node, $another);
@@ -25,7 +24,7 @@ role XML::XPath::InfixExprOperatorPerElement {
         return $result;
     }
 
-    multi method op-result-helper(XML::XPath::Result $one, XML::XPath::Result::ResultList $another) {
+    multi method op-result-helper($one, XML::XPath::Result::ResultList $another) {
         my $result = XML::XPath::Result::ResultList.new;
         for $another.nodes -> $node {
             #            $result.add: self.op-result-helper($node, $one);
@@ -38,8 +37,7 @@ role XML::XPath::InfixExprOperatorPerElement {
         my $maxsize = $one.elems max $another.elems;
         my $result = XML::XPath::Result::ResulList.new;
         for 0..$maxsize -> $index {
-            #$result.add: self.op-result-helper($one[$index], $another[$index]);
-            $result.add: XML::XPath::Result::Boolean.new: value => $one[$index].equals($another[$index]);
+            $result.add: $one[$index].equals($another[$index]);
         }
         return $result;
     }

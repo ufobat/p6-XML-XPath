@@ -17,21 +17,21 @@ ENDXML
 my $set;
 $set = $x.find('//BBB[@id]');
 is $set.nodes.elems, 2 , 'found one node';
-is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
-is $set.nodes[1].value.name, 'BBB', 'node name is BBB';
+is $set.nodes[0].name, 'BBB', 'node name is BBB';
+is $set.nodes[1].name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[@name]');
-say $set.elems;
-isa-ok $set, XML::XPath::Result::Node, 'found one node';
-is $set.value.name, 'BBB', 'node name is BBB';
+does-ok $set, XML::Node, 'found one node';
+is $set.name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[@*]');
-is $set.nodes.elems, 3 , 'found one node';
-is $set.nodes[0].value.name, 'BBB', 'node name is BBB';
+is $set.nodes.elems, 3 , 'found 3 node';
+is $set.nodes[0].name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[not(@*)]');
-isa-ok $set, XML::XPath::Result::Node, 'found one node';
-is $set.value.name, 'BBB', 'node name is BBB';
-is $set.value.attribs.elems, 0, 'and node really has no attribute';
+say $set;
+does-ok $set, XML::Node, 'found one node';
+is $set.name, 'BBB', 'node name is BBB';
+is $set.attribs.elems, 0, 'and node really has no attribute';
 
 done-testing;

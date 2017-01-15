@@ -1,6 +1,5 @@
 use v6.c;
 
-use XML::XPath::Result;
 use XML::XPath::Result::ResultList;
 use XML::XPath::Types;
 

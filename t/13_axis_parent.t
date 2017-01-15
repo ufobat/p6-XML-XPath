@@ -15,6 +15,6 @@ ENDXML
 my $set;
 $set = $x.find('//DDD/parent::*');
 is $set.elems, 4, 'found 1 elements';
-is $set[3].value.name, 'EEE', '3th node is EEE';
+is $set[3].name, 'EEE', '3th node is EEE';
 
 done-testing;

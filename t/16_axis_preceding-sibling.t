@@ -30,16 +30,17 @@ ENDXML
 
 my $set;
 $set = $x.find('/AAA/XXX/preceding-sibling::*');
-is $set.elems, 1, 'found one node';
-is $set[0].value.name, 'BBB', 'found node is BBB';
+
+does-ok $set, XML::Node, 'found one node';
+is $set.name, 'BBB', 'found node is BBB';
 
 $set = $x.find('//CCC/preceding-sibling::*');
 is $set.elems , 4, 'found four nodes';
 
 $set = $x.find('/AAA/CCC/preceding-sibling::*[1]');
-is $set.value.name , 'XXX', 'found node XXX';
+is $set.name , 'XXX', 'found node XXX';
 
 $set = $x.find('/AAA/CCC/preceding-sibling::*[2]');
-is $set.value.name , 'BBB', 'found node BBB';
+is $set.name , 'BBB', 'found node BBB';
 
 done-testing;
