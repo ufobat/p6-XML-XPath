@@ -16,17 +16,17 @@ ENDXML
 
 my $set;
 $set = $x.find('//BBB[@id]');
-is $set.nodes.elems, 2 , 'found one node';
-is $set.nodes[0].name, 'BBB', 'node name is BBB';
-is $set.nodes[1].name, 'BBB', 'node name is BBB';
+is $set.elems, 2 , 'found one node';
+is $set[0].name, 'BBB', 'node name is BBB';
+is $set[1].name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[@name]');
 does-ok $set, XML::Node, 'found one node';
 is $set.name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[@*]');
-is $set.nodes.elems, 3 , 'found 3 node';
-is $set.nodes[0].name, 'BBB', 'node name is BBB';
+is $set.elems, 3 , 'found 3 node';
+is $set[0].name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[not(@*)]');
 say $set;

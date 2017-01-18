@@ -19,11 +19,11 @@ does-ok $set, XML::Node, 'found one node';
 is $set.name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[@name="bbb"]', :to-list(True));
-is $set.nodes.elems, 1 , 'found one attrib';
-is $set.nodes[0].name, 'BBB', 'node name is BBB';
+is $set.elems, 1 , 'found one attrib';
+is $set[0].name, 'BBB', 'node name is BBB';
 
 $set = $x.find('//BBB[normalize-space(@name)="bbb"]');
-is $set.nodes.elems, 2 , 'found one node';
-is $set.nodes[0].name, 'BBB', 'node name is BBB';
+is $set.elems, 2 , 'found one node';
+is $set[0].name, 'BBB', 'node name is BBB';
 
 done-testing;

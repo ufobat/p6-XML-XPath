@@ -1,5 +1,4 @@
 use XML;
-use XML::XPath::Result::ResultList;
 use XML::XPath::Actions;
 use XML::XPath::Grammar;
 
@@ -24,20 +23,15 @@ class XML::XPath {
     }
 
     method find(Str $xpath, Bool :$to-list) {
-        my %*NAMESPACES = %.registered-namespaces;
-        my $parsed-xpath   = self.parse-xpath($xpath);
-        my $start-nodeset  = XML::XPath::Result::ResultList.new();
-        $start-nodeset.add: $.document;
-        my $result = $parsed-xpath.evaluate($start-nodeset);
-        if $to-list and not $result ~~ XML::XPath::Result::ResultList {
-            my $list = XML::XPath::Result::ResultList.new;
-            $list.add: $result;
-            return $list;
-        } elsif $result ~~ XML::XPath::Result::ResultList {
-            return $result.trim(:$to-list);
-        } else {
-            return $result;
+        my %*NAMESPACES  = %.registered-namespaces;
+        my $parsed-xpath = self.parse-xpath($xpath);
+        my $result       = $parsed-xpath.evaluate($.document, 0, 1);
+        if $result ~~ Array && $result.elems == 1 && not $to-list {
+            return $result[0];
+        } elsif $result.elems == 0 && not $to-list {
+            return Nil;
         }
+        return $result;
     }
 
     method parse-xpath(Str $xpath) {

@@ -1,5 +1,4 @@
 use v6.c;
-use XML::XPath::Result::ResultList;
 use XML::XPath::Evaluable;
 use XML::XPath::Types;
 use XML::XPath::ExprOperator::Equal;
@@ -18,11 +17,11 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
     has $.other-operand is rw;
     has @.predicates;
 
-    method evaluate(XML::XPath::Result::ResultList $set, Int :$index) {
+    method evaluate(ResultType $set, Int $index, Int $of) {
         my $result;
 
         # todo proove of TODO
-        die if $set.elems > 1 && not( $index.defined );
+        #die if $set.elems > 1 && not( $index.defined );
 
         if ($.operand ~~ XML::XPath::Evaluable)
         and $.operator
@@ -30,14 +29,14 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
 
             try {
                 my $operator-strategy = ::('XML::XPath::ExprOperator::' ~ $.operator).new;
-                $result = $operator-strategy.invoke(self, $set, :$index);
+                $result = $operator-strategy.invoke(self, $set, $index, $of);
                 CATCH {
                     say "caught $_";
                 }
             }
 
         } elsif ($.operand ~~ XML::XPath::Evaluable) {
-            $result = $.operand.evaluate($set, :$index);
+            $result = $.operand.evaluate($set, $index, $of);
         } elsif ($.operand ~~ Str) {
             $result = $.operand;
         } elsif ($.operand ~~ Numeric) {

@@ -2,6 +2,7 @@ use v6.c;
 
 use Test;
 use XML::XPath;
+use Data::Dump;
 
 plan 7;
 
@@ -31,11 +32,11 @@ does-ok $set, XML::Node, 'found one node';
 is $set.name, 'AAA', 'node name is AAA';
 
 $set = $x.find("/AAA/BBB");
-is $set.nodes.elems, 3 , 'found three nodes';
-is $set.nodes[0].name, 'BBB', 'node name is BBB';
+is $set.elems, 3 , 'found three nodes';
+is $set[0].name, 'BBB', 'node name is BBB';
 
 $set = $x.find("/AAA/DDD/BBB");
-is $set.nodes.elems, 2 , 'found three nodes';
-is $set.nodes[0].name, 'BBB', 'node name is BBB';
+is $set.elems, 2 , 'found 2 nodes';
+is $set[0].name, 'BBB', 'node name is BBB';
 
 done-testing;

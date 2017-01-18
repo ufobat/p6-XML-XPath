@@ -1,9 +1,8 @@
 use v6.c;
 
 use XML;
-use XML::XPath::Result::ResultList;
 use XML::XPath::Types;
 
 role XML::XPath::Evaluable {
-    method evaluate(XML::XPath::Result::ResultList $set, Int :$index) {...}
+    method evaluate(ResultType $point, Int $index, Int $of) { ... }
 }
