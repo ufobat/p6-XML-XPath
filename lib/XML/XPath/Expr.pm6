@@ -1,5 +1,6 @@
 use v6.c;
 use XML::XPath::Evaluable;
+use XML::XPath::Predicates;
 use XML::XPath::Types;
 use XML::XPath::ExprOperator::Equal;
 use XML::XPath::ExprOperator::Mod;
@@ -15,7 +16,7 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
     has $.operand is rw;
     has Operator $.operator is rw;
     has $.other-operand is rw;
-    has @.predicates;
+    has XML::XPath::Predicates $.predicates is rw = XML::XPath::Predicates.new;
 
     method evaluate(ResultType $set, Int $index, Int $of) {
         my $result;
@@ -41,11 +42,7 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
             $result = [ $.operand ];
         }
 
-        if @.predicates {
-            # TODO apply predicates to nodeset
-            X::NYI.new(feature => 'evalute of Expr with predicates').throw;
-        }
-        return $result;
+        return $.predicates.evaluate-predicates($result);
     }
 }
 

@@ -1,6 +1,7 @@
 use v6.c;
 use XML::XPath::Expr;
 use XML::XPath::Step;
+use XML::XPath::Predicates;
 use XML::XPath::NodeTest;
 use XML::XPath::FunctionCall;
 use Data::Dump;
@@ -137,7 +138,7 @@ class XML::XPath::Actions {
         my $primary-expr = $/<PrimaryExpr>;
         my @predicates   = $/<Predicate>;
         my $expr         = $primary-expr.made;
-        $expr.predicates = @predicates>>.made;
+        $expr.predicates = XML::XPath::Predicates.new( predicates => @predicates>>.made);
         self.mymake($/, $expr);
     }
 
@@ -242,7 +243,7 @@ class XML::XPath::Actions {
             $step = XML::XPath::Step.new(:$axis, :$test);
 
             my @predicates   = $/<Predicate>;
-            $step.predicates = @predicates>>.made;
+            $step.predicates = XML::XPath::Predicates.new( predicates => @predicates>>.made);
 
             if $/<StepDelim>:exists {
                 $step = XML::XPath::Step.new(axis => 'descendant-or-self', next => $step);
