@@ -1,6 +1,7 @@
 use XML;
 use XML::XPath::Actions;
 use XML::XPath::Grammar;
+use XML::XPath::Utils;
 
 class XML::XPath {
     has $.document;
@@ -26,10 +27,8 @@ class XML::XPath {
         my %*NAMESPACES  = %.registered-namespaces;
         my $parsed-xpath = self.parse-xpath($xpath);
         my $result       = $parsed-xpath.evaluate($.document, 0, 1);
-        if $result ~~ Array && $result.elems == 1 && not $to-list {
-            return $result[0];
-        } elsif $result.elems == 0 && not $to-list {
-            return Nil;
+        unless $to-list {
+            return unwrap $result, :to-nil(True);
         }
         return $result;
     }

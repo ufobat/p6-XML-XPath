@@ -1,6 +1,7 @@
 use v6.c;
 
 use XML::XPath::Types;
+use XML::XPath::Utils;
 use XML;
 
 role XML::XPath::InfixExprOperatorPerElement {
@@ -11,11 +12,11 @@ role XML::XPath::InfixExprOperatorPerElement {
         my $other-set = $expr.other-operand.evaluate($set, $index, $of);
 
 #        say "invoke: ", $first-set.perl, $other-set.perl;
-        return self.op-result-helper($first-set, $other-set);
+        return self.op-result-helper(unwrap($first-set), unwrap($other-set));
     }
 
     multi method op-result-helper(ResultType $one, ResultType $another) {
-        self.check($one, $another);
+        return [ self.check($one, $another) ];
     }
 
     multi method op-result-helper(Array $one, ResultType $another) {
@@ -39,7 +40,8 @@ role XML::XPath::InfixExprOperatorPerElement {
         my $maxsize = $one.elems max $another.elems;
         my $result  = [];
         for 0..$maxsize -> $index {
-            $result.push: $one[$index].equals($another[$index]);
+#            say "index $index -> ", $one[$index], " - ", $another[$index];
+            $result.append: self.op-result-helper($one[$index], $another[$index]).flat
         }
         return $result;
     }

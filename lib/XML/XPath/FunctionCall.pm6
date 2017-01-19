@@ -2,6 +2,7 @@ use v6.c;
 
 use XML::XPath::Evaluable;
 use XML::XPath::Types;
+use XML::XPath::Utils;
 
 class XML::XPath::FunctionCall does XML::XPath::Evaluable {
     has $.function is required;
@@ -13,26 +14,26 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
 
     method !fn-last(ResultType $set, Int $index, Int $of) {
         die 'functioncall last() requires no parameter' unless @.args.elems == 0;
-        return $of;
+        return [ $of ];
     }
 
     method !fn-not(ResultType $set, Int $index, Int $of) {
         die 'functioncall not() requires one parameter' unless @.args.elems == 1;
         my $expression = @.args[0];
         my $interim = $expression.evaluate($set, $index, $of);
-        return !$interim.Bool;
+        return [ !$interim.Bool ];
     }
 
     method !fn-position(ResultType $set, Int $index, Int $of) {
         die 'functioncall position() requires no parameter' unless @.args.elems == 0;
-        return $index;
+        return [ $index ];
     }
 
     method !fn-count(ResultType $set, Int $index, Int $of) {
         die 'functioncall count() requires one parameter' unless @.args.elems == 1;
         my $expr    = @.args[0];
         my $interim = $expr.evaluate($set, $index, $of);
-        return $interim.elems;
+        return [ $interim.elems ];
     }
 
     method !fn-name(ResultType $set, Int $index, Int $of) {
@@ -51,7 +52,7 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
             }
         } else {
             # the more common way for name()
-            return $set.name;
+            return [ $set.name ];
         }
     }
 
@@ -67,7 +68,7 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
             }
             return $result;
         } else {
-            return $converter.($interim);
+            return [ $converter.($interim) ];
         }
     }
     method !fn-floor(ResultType $set, Int $index, Int $of) {
@@ -111,10 +112,10 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
     method !help-two-arg-second-string(ResultType $set, Int $index, Int $of, Sub $converter) {
         my $interim        = @.args[0].evaluate($set, $index, $of);
         my $string-result  = @.args[1].evaluate($set, $index, $of);
-        unless $string-result ~~ Str {
+        my $string = unwrap($string-result);
+        unless $string ~~ Str {
             die 'functioncall 2nd expression must evaluate into a String';
         }
-        my $string = $string-result.Str;
         if $interim ~~ Array {
             my $result  = [];
             for $interim.values -> $node {
@@ -122,7 +123,7 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
             }
             return $result;
         } else {
-            return $converter.($interim, $string);
+            return [ $converter.($interim, $string) ];
         }
     }
     method !fn-starts-with(ResultType $set, Int $index, Int $of) {

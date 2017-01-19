@@ -37,13 +37,8 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
 
         } elsif ($.operand ~~ XML::XPath::Evaluable) {
             $result = $.operand.evaluate($set, $index, $of);
-        } elsif ($.operand ~~ Str) {
-            $result = $.operand;
-        } elsif ($.operand ~~ Numeric) {
-            $result = $.operand;
         } else {
-            # this should never happen!
-            die 'WHAT - this should never happen';
+            $result = [ $.operand ];
         }
 
         if @.predicates {

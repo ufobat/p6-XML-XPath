@@ -2,6 +2,7 @@ use v6.c;
 use XML::XPath::NodeTest;
 use XML::XPath::Evaluable;
 use XML::XPath::Types;
+use XML::XPath::Utils;
 
 class XML::XPath::Step does XML::XPath::Evaluable {
     has Axis $.axis is rw is required;
@@ -36,14 +37,11 @@ class XML::XPath::Step does XML::XPath::Evaluable {
                 #say $node.perl;
                 say $predicate-result.perl;
 
-                if $predicate-result ~~ Array and $predicate-result.elems == 1 {
-                     $predicate-result = $predicate-result[0];
-                }
+                $predicate-result = unwrap($predicate-result);
 
                 if $predicate-result ~~ Numeric and $predicate-result !~~ Stringy and $predicate-result !~~ Bool {
                     $interim.push: $node if $predicate-result - 1 == $index;
                 } elsif $predicate-result ~~ Bool {
-                    say "TAKE";
                     $interim.push: $node if $predicate-result.Bool;
                 } elsif $predicate-result ~~ Str {
                     $interim.push: $node if $predicate-result.Bool;
