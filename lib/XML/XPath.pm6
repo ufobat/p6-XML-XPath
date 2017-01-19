@@ -23,10 +23,11 @@ class XML::XPath {
         $!document = $doc;
     }
 
-    method find(Str $xpath, Bool :$to-list) {
+    method find(Str $xpath, XML::Node :$start, Bool :$to-list) {
         my %*NAMESPACES  = %.registered-namespaces;
         my $parsed-xpath = self.parse-xpath($xpath);
-        my $result       = $parsed-xpath.evaluate($.document, 0, 1);
+        my $start-point  = $start ?? $start !! $.document;
+        my $result       = $parsed-xpath.evaluate($start-point, 0, 1);
         unless $to-list {
             return unwrap $result, :to-nil(True);
         }
