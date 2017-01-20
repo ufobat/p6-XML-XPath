@@ -1,6 +1,7 @@
 use v6.c;
 use XML::XPath::Evaluable;
 use XML::XPath::Types;
+use XML::XPath::Utils;
 
 class XML::XPath::NodeTest {
     has Type $.type = "node";
@@ -164,10 +165,7 @@ class XML::XPath::NodeTest {
                             my $ns     = @values[0];
                             my $name   = @values[1];
                             if %*NAMESPACES{ $ns }:exists {
-                                $node.name    ~~ / [ (<-[:]>+) ':' ]?  (<-[:]>+)/;
-                                my $node-ns   = $/[0];
-                                my $node-name = $/[1];
-                                my $uri       = $node-ns ?? $node.nsURI($node-ns) !! $node.nsURI();
+                                my ($uri, $node-name) = namespace-infos($node);
                                 $take = $uri eq %*NAMESPACES{ $ns } && $node-name eq $name;
                                 say "Namespace $ns exists TAKE($take) node {$node.name}, $uri is $uri ";
                             } else {

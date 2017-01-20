@@ -55,21 +55,28 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
 
     method !fn-name(ResultType $set, Int $index, Int $of) {
         die "name can not have more then one parameter: @.args.elems" if @.args.elems > 1;
+        my $converter = sub ($r) {
+            $r.name;
+        }
         if @.args.elems == 1 {
-            my $expr    = @.args[0];
-            my $interim = $expr.evaluate($set, $index, $of).trim;;
-            if $interim.elems {
-                my $result  = [];
-                for $interim.values -> $node {
-                    $result.push: $node.name;
-                }
-                return $result;
-            } else {
-                return Nil;
-            }
+            self!help-one-arg-string($set, $index, $of, $converter);
         } else {
             # the more common way for name()
-            return [ $set.name ];
+            return [ $converter.($set) ];
+        }
+    }
+
+    method !fn-namespace-uri(ResultType $set, Int $index, Int $of) {
+        die "namespace-uri can not have more then one parameter: @.args.elems" if @.args.elems > 1;
+        my $converter = sub ($r) {
+            my ($uri, $node-name) = namespace-infos($r);
+            return $uri;
+        }
+        if @.args.elems == 1 {
+            self!help-one-arg-string($set, $index, $of, $converter);
+        } else {
+            # the more common way for name()
+            return [ $converter.($set) ];
         }
     }
 
@@ -84,8 +91,6 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
                 $result.push: $converter.($node);
             }
             return $result;
-        } else {
-            return [ $converter.($interim) ];
         }
     }
     method !fn-floor(ResultType $set, Int $index, Int $of) {
