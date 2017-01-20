@@ -3,7 +3,7 @@ use v6.c;
 use Test;
 use XML::XPath;
 
-plan 2;
+plan 3;
 
 my $x = XML::XPath.new(xml => q:to/ENDXML/);
 <foo xmlns:text="http://example.com/text">

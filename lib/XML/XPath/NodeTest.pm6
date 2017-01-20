@@ -10,7 +10,10 @@ class XML::XPath::NodeTest {
         my $result = [];
         given $axis {
             when 'self' {
-                $result.push: $xml-node if self!test-node($xml-node);
+                if self!test-node($xml-node) {
+                    # xpath can not return the document.
+                    $result.push: $xml-node ~~ XML::Document ?? $xml-node.root !! $xml-node;
+                }
             }
             when 'child' {
                 my @nodes = self!get-children($xml-node);
@@ -38,7 +41,7 @@ class XML::XPath::NodeTest {
             }
             when 'parent' {
                 my $parent = $xml-node.parent;
-                unless $parent ~~ XML::Document {
+                if $parent.defined && not ( $parent ~~ XML::Document ) {
                     $result.push: $parent if self!test-node($parent);
                 }
             }
