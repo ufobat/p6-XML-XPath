@@ -18,10 +18,7 @@ my $x = XML::XPath.new(debug => 1, xml => q:to/ENDXML/);
 </xml>
 ENDXML
 
-# Don't set namespace prefixes - uses element context namespaces
 my $set;
-
-# value 1 and value 2
 $set = $x.find('//a/b[2]');
 is $set.elems, 2, 'found 2 nodes';
 
