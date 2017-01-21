@@ -116,16 +116,16 @@ class XML::XPath::Actions {
     }
 
     method UnaryExpr($/) {
-        my $union-expression = $/<UnionExpr>;
+        my $union-expression = $/<UnionExpr>.made;
         my $operator-prefix = $/<UnaryOperator>.made;
         my $expr;
         if $operator-prefix {
-            my $expr = XML::XPath::Expr.new(
-                operand  => $union-expression.made,
-                operator => $operator-prefix.Str,
+            $expr = XML::XPath::Expr.new(
+                operand  => $union-expression,
+                operator => $operator-prefix,
             );
         } else {
-            $expr = $union-expression.made;
+            $expr = $union-expression;
         }
         self.mymake($/, $expr);
     }

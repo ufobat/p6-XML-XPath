@@ -11,6 +11,7 @@ use XML::XPath::ExprOperator::Minus;
 use XML::XPath::ExprOperator::Div;
 use XML::XPath::ExprOperator::SmallerThan;
 use XML::XPath::ExprOperator::GreaterThan;
+use XML::XPath::ExprOperator::UnaryMinus;
 
 class XML::XPath::Expr does XML::XPath::Evaluable {
     has $.operand is rw;
@@ -23,10 +24,9 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
 
         # todo proove of TODO
         #die if $set.elems > 1 && not( $index.defined );
-
+        say "op: $.operator" if $.operator.defined;
         if ($.operand ~~ XML::XPath::Evaluable)
-        and $.operator
-        and ($.other-operand ~~ XML::XPath::Evaluable) {
+        and $.operator {
 
             try {
                 my $operator-strategy = ::('XML::XPath::ExprOperator::' ~ $.operator).new;
