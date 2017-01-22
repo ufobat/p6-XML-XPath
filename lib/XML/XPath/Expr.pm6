@@ -24,7 +24,7 @@ class XML::XPath::Expr does XML::XPath::Evaluable {
 
         # todo proove of TODO
         #die if $set.elems > 1 && not( $index.defined );
-        say "op: $.operator" if $.operator.defined;
+        #say "op: $.operator" if $.operator.defined;
         if ($.operand ~~ XML::XPath::Evaluable)
         and $.operator {
 

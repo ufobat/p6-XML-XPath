@@ -10,7 +10,15 @@ class XML::XPath::ExprOperator::Div does XML::XPath::InfixExprOperatorPerElement
         }
         my $val_a = $a ~~ XML::Node ?? self!node-to-value($a) !! $a;
         my $val_b = $b ~~ XML::Node ?? self!node-to-value($b) !! $b;
-        my $value = $val_a / $val_b;
+        my $value;
+
+        if $val_a == 0 and $val_b == 0 {
+            $value = NaN;
+        } elsif $val_b == 0 {
+            $value = $val_a * Inf;
+        } else {
+            $value = $val_a / $val_b;
+        }
         return $value;
     }
 

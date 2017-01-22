@@ -95,23 +95,26 @@ class XML::XPath::Actions {
     method !expression(@tokens, $/, @operators) {
         die 'at least 1 *Expr required' if @tokens.elems < 1;
         my $last_expression;
-        my $first_expression;
+        my $expression;
         for @tokens.kv -> $i, $token {
-            my $expression = $token.made;
+            $expression = $token.made;
             if $expression ~~ XML::XPath::Step {
                 # in case a expression is a step wrap it so we can attach
                 # <some kind of operator> <Expr>
                 $expression = XML::XPath::Expr.new(operand => $expression);
             }
             if ($last_expression) {
-                $last_expression.operator      = @operators[$i-1].made;
-                $last_expression.other-operand = $expression;
+                $expression = XML::XPath::Expr.new(
+                    operand       => $last_expression,
+                    operator      => @operators[$i-1].made,
+                    other-operand => $expression,
+                );
             }
             $last_expression = $expression;
-            $first_expression = $expression unless $first_expression;
+            #$first_expression = $expression unless $first_expression;
         }
         # wrap it, so someone else can attach with an operator to it
-        my $made = XML::XPath::Expr.new(operand => $first_expression);
+        my $made = XML::XPath::Expr.new(operand => $expression);
         self.mymake($/, $made, level => 2);
     }
 
