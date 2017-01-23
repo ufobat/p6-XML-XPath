@@ -189,4 +189,13 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
         }
         return [ $result ];
     }
+    method !fn-concat(ResultType $set, Int $index, Int $of) {
+        die 'functioncall concat() requires at least one parameter' unless @.args.elems > 0;
+
+        my $result = "";
+        for @.args -> $arg {
+            $result ~= unwrap $arg.evaluate($set, $index, $of);
+        }
+        return [$result];
+    }
 }
