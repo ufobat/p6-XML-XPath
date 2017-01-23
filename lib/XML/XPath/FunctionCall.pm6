@@ -161,24 +161,32 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
 
     method !fn-substring(ResultType $set, Int $index, Int $of) {
         die 'functioncall substring() requires 2 or 3 parameters' unless @.args.elems == 2|3;
-        my $string   = unwrap @.args[0].evaluate($set, $index, $of);
-        my $position = unwrap @.args[1].evaluate($set, $index, $of);
-        say "p:$position";
-        $position = round($position - 1);
-        say "p:$position";
-        $position = $position < 0 ?? $string.chars - $position !! $position;
-        say "string=$string pos=$position";
-        # round para
-        # negative wird zu *-1
+        my $string = unwrap @.args[0].evaluate($set, $index, $of);
+        my $start  = round unwrap @.args[1].evaluate($set, $index, $of);
+
         my $result;
-        if @.args[2]:exists {
-            my $chars = unwrap @.args[2].evaluate($set, $index, $of);
-            $chars = $chars.round;
-            say "chars=$chars";
-            $result = [$string.substr($position, $chars) ];
-        } else {
-            $result = [$string.substr($position) ];
+        if $start ~~ NaN {
+            $result = "";
         }
-        return $result;
+        elsif @.args[2]:exists {
+            my $end = round unwrap @.args[2].evaluate($set, $index, $of);
+
+            if $start < 1 {
+                $end  -= 1 - $start;
+                $start = 0;
+            } else {
+                $start--;
+            }
+
+            if $end ~~ NaN {
+                $result = "";
+            } else {
+                $result = $string.substr($start, $end);
+            }
+        } else {
+            $start = $start < 1 ?? 0 !! $start - 1;
+            $result = $string.substr($start);
+        }
+        return [ $result ];
     }
 }
