@@ -3,7 +3,7 @@ use v6.c;
 use Test;
 use XML::XPath;
 
-plan 3;
+plan 11;
 
 my $x = XML::XPath.new(xml => q:to/ENDXML/);
 <page></page>
