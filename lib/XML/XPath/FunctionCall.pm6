@@ -158,6 +158,22 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
         my $converter = sub ($r, Str $s){ $r.Str.contains($s) };
         return self!help-two-arg-second-string($set, $index, $of, $converter);
     }
+    method !fn-substring-before(ResultType $set, Int $index, Int $of) {
+        die "functioncall containts() requires two parameters" unless @.args.elems == 2;
+        my $converter = sub ($r, Str $s){
+            my $match = $r.Str ~~ /$s/;
+            return $match ?? $match.prematch !! '';
+        };
+        return self!help-two-arg-second-string($set, $index, $of, $converter);
+    }
+    method !fn-substring-after(ResultType $set, Int $index, Int $of) {
+        die "functioncall containts() requires two parameters" unless @.args.elems == 2;
+        my $converter = sub ($r, Str $s){
+            my $match = $r.Str ~~ m/$s/;
+            return $match ?? $match.postmatch !! '';
+        };
+        return self!help-two-arg-second-string($set, $index, $of, $converter);
+    }
 
     method !fn-substring(ResultType $set, Int $index, Int $of) {
         die 'functioncall substring() requires 2 or 3 parameters' unless @.args.elems == 2|3;
