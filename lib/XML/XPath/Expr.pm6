@@ -5,6 +5,7 @@ use XML::XPath::Types;
 use XML::XPath::ExprOperator::Equal;
 use XML::XPath::ExprOperator::Mod;
 use XML::XPath::ExprOperator::Or;
+use XML::XPath::ExprOperator::And;
 use XML::XPath::ExprOperator::Pipe;
 use XML::XPath::ExprOperator::Plus;
 use XML::XPath::ExprOperator::Minus;
