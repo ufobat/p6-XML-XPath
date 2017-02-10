@@ -4,8 +4,8 @@ use XML::XPath::Types;
 use XML::XPath::Utils;
 
 class XML::XPath::NodeTest {
-    has Type $.type = "node";
-    has Str $.value;
+    has Type $.type is rw = "node";
+    has Str $.value is rw;
 
     method evaluate-node(XML::Node $xml-node is copy, Axis $axis --> Array) {
         my $result = [];

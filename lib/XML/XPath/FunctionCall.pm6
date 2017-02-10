@@ -43,7 +43,7 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
 
     method !fn-position(ResultType $set, Int $index, Int $of) {
         die 'functioncall position() requires no parameter' unless @.args.elems == 0;
-        return [ $index ];
+        return [ $index + 1 ];
     }
 
     method !fn-count(ResultType $set, Int $index, Int $of) {
@@ -103,6 +103,7 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
     method !fn-ceiling(ResultType $set, Int $index, Int $of) {
         die 'functioncall floor() requires no parameter' unless @.args.elems == 1;
         my $converter = sub ($r){
+            say "r = $r ceiling -> ", $r.ceiling, " ", $r.perl, " what:",  $r.WHAT;
             $r.ceiling;
         };
         self!help-one-arg-string($set, $index, $of, $converter);
@@ -115,7 +116,7 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
         self!help-one-arg-string($set, $index, $of, $converter);
     }
     method !fn-string-length(ResultType $set, Int $index, Int $of) {
-        die 'functioncall normalize-space() reqires one parameter' unless @.args.elems == 1;
+        die 'functioncall string-length() reqires one parameter' unless @.args.elems == 1;
         my $converter = sub ($r){
             $r.defined ?? $r.Str.chars !! 0;
         };

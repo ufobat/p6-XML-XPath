@@ -2,7 +2,6 @@ use v6.c;
 use XML::XPath::Expr;
 use XML::XPath::Step;
 use XML::XPath::Predicates;
-use XML::XPath::NodeTest;
 use XML::XPath::FunctionCall;
 use Data::Dump;
 
@@ -225,6 +224,22 @@ class XML::XPath::Actions {
         self.mymake($/, $pathexpr);
 
     }
+    # method NodeTest($/) {
+    #     if $/<NameTest>:exists {
+    #         $nodetest .= new(value => ~$/<NameTest>);
+    #         self.mymake($/, $nodetest);
+    #     }
+    #     elsif $/<NodeType>:exists {
+    #         $nodetest .= new(type => ~$/<NodeType>);
+    #     }
+    #     else {
+    #         $nodetest .= new(
+    #             type  => 'processing-instruction',
+    #             value => ~$<Literal>
+    #         );
+    #     }
+    #     self.mymake($/, $nodetest);
+    # }
     method Step($/) {
         my $step;
         if $/<AbbreviatedStep>:exists {
@@ -234,16 +249,28 @@ class XML::XPath::Actions {
             );
         }
         else {
-            my $test = $/<NodeTest>.made;
+            my $nodetest = $/<NodeTest>;
             my $axis;
             if $/<AxisSpecifier> eq '' {
+                $axis = $nodetest<NameTest>:exists ?? 'child' !! 'self';
                 $axis = 'child';
             } elsif $/<AxisSpecifier> eq '@' {
                 $axis = 'attribute';
             } else {
                 $axis = $/<AxisSpecifier>.substr(0,*-2);
             }
-            $step = XML::XPath::Step.new(:$axis, :$test);
+            $step = XML::XPath::Step.new(:$axis);
+
+            if $nodetest<NameTest>:exists {
+                $step.value = ~$nodetest<NameTest>
+            }
+            elsif $nodetest<NodeType>:exists {
+                $step.type = ~$nodetest<NodeType>;
+            }
+            else {
+                $step.type = 'processing-instruction';
+                $step.value = ~$<Literal>;
+            }
 
             my @predicates   = $/<Predicate>;
             $step.predicates = XML::XPath::Predicates.new( predicates => @predicates>>.made);
@@ -253,23 +280,6 @@ class XML::XPath::Actions {
             }
         }
         self.mymake($/, $step);
-    }
-    method NodeTest($/) {
-        my XML::XPath::NodeTest $nodetest;
-        if $/<NameTest>:exists {
-            $nodetest .= new(value => ~$/<NameTest>);
-            self.mymake($/, $nodetest);
-        }
-        elsif $/<NodeType>:exists {
-            $nodetest .= new(type => ~$/<NodeType>);
-        }
-        else {
-            $nodetest .= new(
-                type  => 'processing-instruction',
-                value => ~$<Literal>
-            );
-        }
-        self.mymake($/, $nodetest);
     }
     method Predicate($/) {
         self.mymake($/, $/<PredicateExpr>.made);

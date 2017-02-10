@@ -5,9 +5,8 @@ use XML::XPath::Predicates;
 use XML::XPath::Types;
 use XML::XPath::Utils;
 
-class XML::XPath::Step does XML::XPath::Evaluable {
+class XML::XPath::Step does XML::XPath::Evaluable is XML::XPath::NodeTest {
     has Axis $.axis is rw is required;
-    has XML::XPath::NodeTest $.test = XML::XPath::NodeTest.new;
     has XML::XPath::Step $.next is rw;
     has XML::XPath::Predicates $.predicates is rw = XML::XPath::Predicates.new;
     has Bool $.is-absolute is rw = False;
@@ -25,7 +24,7 @@ class XML::XPath::Step does XML::XPath::Evaluable {
         ?? self!get-resultlist-with-root($set)
         !! $set;
 
-        my $result = $.test.evaluate-node($start-evaluation, $.axis);
+        my $result = self.evaluate-node($start-evaluation, $.axis);
         $result = $.predicates.evaluate-predicates($result);
 
         if $.next {
