@@ -149,6 +149,30 @@ class XML::XPath::FunctionCall does XML::XPath::Evaluable {
             return [ $converter.($interim, $string) ];
         }
     }
+    method !help-three-arg-second-thrid-string(ResultType $set, Int $index, Int $of, Sub $converter) {
+        my $interim        = @.args[0].evaluate($set, $index, $of);
+        my $string-result1 = @.args[1].evaluate($set, $index, $of);
+        my $string-result2 = @.args[2].evaluate($set, $index, $of);
+        my $string1        = unwrap($string-result1);
+        my $string2        = unwrap($string-result2);
+        unless $string1 ~~ Str or $string2 ~~ Str {
+            die 'functioncall 2nd and 3rd expression must evaluate into a String';
+        }
+        if $interim ~~ Array {
+            my $result  = [];
+            for $interim.values -> $node {
+                $result.push: $converter.($node, $string1, $string2);
+            }
+            return $result;
+        } else {
+            return [ $converter.($interim, $string1, $string2) ];
+        }
+    }
+    method !fn-translate(ResultType $set, Int $index, Int $of) {
+        die 'functioncall translate() requires three parameters' unless @.args.elems == 3;
+        my $converter = sub ($r, Str $s1, Str $s2) { $r.trans($s1 => $s2, :delete) };
+        return self!help-three-arg-second-thrid-string($set, $index, $of, $converter);
+    }
     method !fn-starts-with(ResultType $set, Int $index, Int $of) {
         die "functioncall starts-with() requires two parameters" unless @.args.elems == 2;
         my $converter = sub ($r, Str $s){ $r.Str.starts-with($s) };
