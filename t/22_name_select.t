@@ -17,7 +17,7 @@ my $x = XML::XPath.new(xml => q:to/ENDXML/);
 ENDXML
 
 my $set;
-$set = $x.find('//*[name()=/AAA/SELECT]');
+$set = $x.find('//*[ name() = /AAA/SELECT ]');
 say "--";
 say $set;
 is $set.elems, 2, '2 nodes';

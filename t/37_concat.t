@@ -12,7 +12,7 @@ my $x = XML::XPath.new(xml => q:to/ENDXML/);
 </p>
 ENDXML
 
-is $x.find('concat("1","2","3")'), "123", "123";
-is $x.find('concat(/p/element4/text(),/p/element5/text())'), 'HelloWorld', 'HelloWorld';
+is $x.find('concat("1", "2", "3")'), "123", "123";
+is $x.find('concat( /p/element4/text(), /p/element5/text() )'), 'HelloWorld', 'HelloWorld';
 
 done-testing;

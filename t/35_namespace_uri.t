@@ -14,7 +14,7 @@ my $x = XML::XPath.new(xml => q:to/ENDXML/);
 </xml>
 ENDXML
 
-my $nodes = $x.find("//*[namespace-uri()='foobar.example.com']");
+my $nodes = $x.find("//*[ namespace-uri() = 'foobar.example.com' ]");
 is $nodes.elems, 4, 'found 4 nodes';
 
 done-testing;

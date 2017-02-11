@@ -19,13 +19,13 @@ my $x = XML::XPath.new(xml => q:to/ENDXML/);
 </AAA>
 ENDXML
 
-$set = $x.find('//*[string-length(name())=3]');
+$set = $x.find('//*[ string-length(name()) = 3 ]');
 is $set.elems, 2, 'found 2 text nodes';
 
-$set = $x.find('//*[string-length(name())<3]');
+$set = $x.find('//*[ string-length(name()) < 3 ]');
 is $set.elems, 4, 'found 2 text nodes';
 
-$set = $x.find('//*[string-length(name())>3]');
+$set = $x.find('//*[ string-length(name()) > 3 ]');
 is $set.elems, 3, 'found 2 text nodes';#
 
 done-testing;

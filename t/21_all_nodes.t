@@ -58,7 +58,7 @@ $set = $x.find('//GGG/self::*');
 does-ok $set , XML::Node, '1 self';
 is $set.name, 'GGG', 'first following is GGG';
 
-$set = $x.find('//GGG/ancestor::*|//GGG/descendant::*|//GGG/following::*|//GGG/preceding::*|//GGG/self::*');
+$set = $x.find('//GGG/ancestor::* | //GGG/descendant::* | //GGG/following::* | //GGG/preceding::* | //GGG/self::*');
 is $set.elems, 16, '16 nodes summary';
 
 done-testing;

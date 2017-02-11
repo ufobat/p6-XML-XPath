@@ -2,7 +2,7 @@ use v6.c;
 #use Grammar::Debugger;
 
 grammar XML::XPath::Grammar {
-    token TOP { <Expr> }
+    rule TOP { <.ws>? <Expr> }
 
     # https://www.w3.org/TR/1999/REC-xpath-19991116/
     # [1]
@@ -27,7 +27,7 @@ grammar XML::XPath::Grammar {
     #}
     # rewrite wihtout infinite loop
     token RelativeLocationPath {
-        <Step>+  % <StepDelim>
+        [ <.ws>? <Step> <.ws>? ]+  % <StepDelim>
     }
 
     # [4]
@@ -65,7 +65,7 @@ grammar XML::XPath::Grammar {
     }
 
     # [8]
-    token Predicate { '[' <PredicateExpr> ']' }
+    token Predicate { '[' <.ws>? <PredicateExpr> <.ws>? ']' }
 
     # [9]
     token PredicateExpr { <Expr> }
@@ -87,14 +87,14 @@ grammar XML::XPath::Grammar {
 
     # [16]
     token FunctionCall {
-        <FunctionName> '(' [ <Argument>* % ',' ] ')'
+        <FunctionName> '(' <.ws>? [ [<.ws>? <Argument> <.ws>?]* % ',' ] <.ws>? ')'
     }
 
     # [17]
     token Argument { <Expr> }
 
     # [18]
-    token UnionExpr { <PathExpr>+ % <UnionOperator> }
+    token UnionExpr { [<.ws>? <PathExpr> <.ws>? ]+ % <UnionOperator> }
     token UnionOperator { '|' }
 
     # [19]
@@ -105,32 +105,32 @@ grammar XML::XPath::Grammar {
 
     # [20]
     token FilterExpr {
-        <PrimaryExpr> <Predicate>*
+        <PrimaryExpr> <.ws>? <Predicate> *
     }
 
     # [21]
-    token OrExpr { <AndExpr>+ % <OrOperator> }
+    token OrExpr { [ <.ws>? <AndExpr> <.ws>? ]+ % <OrOperator> }
     token OrOperator { 'or' }
 
     # [22]
-    token AndExpr { <EqualityExpr>+ % <AndOperator> }
+    token AndExpr { [ <.ws>? <EqualityExpr> <.ws>? ]+ % <AndOperator> }
     token AndOperator { 'and' }
 
     # [23]
-    rule EqualityExpr { <RelationalExpr>+ % <EqualityOperator> }
+    token EqualityExpr { [ <.ws>? <RelationalExpr> <.ws>? ]+ % <EqualityOperator> }
     token EqualityOperator { ['=' || '!=' ] }
 
     # [24]
-    token RelationalExpr { <AdditiveExpr>+ % <RelationalOperator> }
+    token RelationalExpr { [ <.ws>? <AdditiveExpr> <.ws>? ]+ % <RelationalOperator> }
     token RelationalOperator { [ [ '<' | '>' ] '='? ] }
 
     # [25]
-    token AdditiveExpr { <MultiplicativeExpr>+ % <AdditiveOperators> }
+    token AdditiveExpr { [ <.ws>? <MultiplicativeExpr> <.ws>? ]+ % <AdditiveOperators> }
     token AdditiveOperators { [ '+' | '-'] }
 
     # [34]
     # [26]
-    token MultiplicativeExpr { <UnaryExpr>+ % <MultiplicativeOperator> }
+    token MultiplicativeExpr { [ <.ws>? <UnaryExpr> <.ws>? ]+ % <MultiplicativeOperator> }
     token MultiplicativeOperator { ['*' | 'div' | 'mod' ] }
 
     # [27]

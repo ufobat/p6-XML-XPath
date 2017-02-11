@@ -21,10 +21,6 @@ my $x = XML::XPath.new(xml => q:to/ENDXML/);
 </text>
 ENDXML
 
-say $x.find("text/para/node()[position()=last()]");
-say $x.find("text/para/node()[position()=last()andpreceding-sibling::important]");
-
-exit;
 is-deeply
 $x.find("text/para/node()[position()=last() and preceding-sibling::important]"),
 $x.find("text/para/node()[preceding-sibling::important and position()=last()]"),

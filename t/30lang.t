@@ -13,10 +13,10 @@ my $x = XML::XPath.new(xml => q:to/ENDXML/);
 ENDXML
 
 my $set;
-$set = $x.find('//*[lang("en")]');
+$set = $x.find('//*[ lang("en")]');
 is $set.elems, 2, 'found 2 english nodes';
 
-$set = $x.find('//content[lang("de")]', :to-list(True));
+$set = $x.find('//content[ lang("de") ]', :to-list(True));
 is $set.elems, 1, 'found 1 german node';
 
 done-testing;
