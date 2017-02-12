@@ -30,15 +30,13 @@ class XML::XPath::NodeTest {
                 self!walk-descendant($xml-node, $result);
             }
             when 'attribute' {
-                for $xml-node.attribs.kv -> $key, $val {
-                    if $.value eq '*' or $.value eq $key {
-                        $result.push($val);
-                    } else {
-                        #$result.add();
+                if $xml-node ~~ XML::Element {
+                    for $xml-node.attribs.kv -> $key, $val {
+                        if $.value eq '*' or $.value eq $key {
+                            $result.push($val);
+                        }
                     }
                 }
-                say $result.perl;
-                #$result = $result.trim: :to-list(True);
             }
             when 'parent' {
                 my $parent = $xml-node.parent;
