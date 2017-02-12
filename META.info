@@ -14,6 +14,7 @@
     "XML::XPath::Actions" : "lib/XML/XPath/Actions.pm6",
     "XML::XPath::Evaluable" : "lib/XML/XPath/Evaluable.pm6",
     "XML::XPath::Expr" : "lib/XML/XPath/Expr.pm6",
+    "XML::XPath::ExprOperator::And" : "lib/XML/XPath/ExprOperator/And.pm6",
     "XML::XPath::ExprOperator::Div" : "lib/XML/XPath/ExprOperator/Div.pm6",
     "XML::XPath::ExprOperator::Equal" : "lib/XML/XPath/ExprOperator/Equal.pm6",
     "XML::XPath::ExprOperator::GreaterThan" : "lib/XML/XPath/ExprOperator/GreaterThan.pm6",
