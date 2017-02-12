@@ -5,7 +5,6 @@ use XML::XPath::Utils;
 
 class XML::XPath {
     has $.document;
-    has $.debug is rw = 0;
     has %.registered-namespaces is rw;
 
     submethod BUILD(:$file, :$xml, :$document) {
@@ -35,9 +34,8 @@ class XML::XPath {
     }
 
     method parse-xpath(Str $xpath) {
-        my $actions        = XML::XPath::Actions.new(:$.debug);
+        my $actions        = XML::XPath::Actions.new();
         my $match          = XML::XPath::Grammar.parse($xpath, :$actions);
-        say $match if $.debug;
         my $parsed-xpath   = $match.ast;
         return $parsed-xpath;
     }

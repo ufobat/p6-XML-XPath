@@ -5,7 +5,7 @@ use XML::XPath;
 
 plan 2;
 
-my $x = XML::XPath.new(debug => 1, xml => q:to/ENDXML/);
+my $x = XML::XPath.new(xml => q:to/ENDXML/);
 <xml>
     <a>
         <b>some 1</b>

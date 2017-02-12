@@ -5,7 +5,7 @@ use XML::XPath;
 
 plan 9;
 
-my $x = XML::XPath.new(debug => 1, xml => q:to/ENDXML/);
+my $x = XML::XPath.new(xml => q:to/ENDXML/);
 <xml xmlns:foo="foobar.example.com"
     xmlns="flubber.example.com">
     <foo>

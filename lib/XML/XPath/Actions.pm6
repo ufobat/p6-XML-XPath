@@ -6,25 +6,14 @@ use XML::XPath::FunctionCall;
 use Data::Dump;
 
 class XML::XPath::Actions {
-    has $.debug;
     method mymake($/, $made, Int :$level = 1) {
-        my $caller = callframe($level);
-        if $.debug {
-            my Str $dump = $made.gist.chars > 30
-            ?? "\n" ~ Dump($made, :skip-methods(True))
-            !! $made.gist;
-
-            if $.debug == 1 {
-                say "called make from { $caller.code.gist }";
-            } else {
-                say "called make from { $caller.code.gist } setting it to: $dump";
-            }
-        }
+        # my $caller = callframe($level);
+        # debug code would be possible here
         $/.make: $made;
     }
 
     method TOP($/) {
-        self.mymake($/, $/<Expr>.made);
+        $/.make: $/<Expr>.made;
     }
 
     method Expr($/) {
