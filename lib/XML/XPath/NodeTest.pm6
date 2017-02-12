@@ -32,9 +32,22 @@ class XML::XPath::NodeTest {
             when 'attribute' {
                 if $xml-node ~~ XML::Element {
                     for $xml-node.attribs.kv -> $key, $val {
-                        if $.value eq '*' or $.value eq $key {
-                            $result.push($val);
+                        my $take = False;
+                        if $.value eq '*' {
+                            $take = True;
+                        } elsif $.value.contains(':') {
+                            my ($ns, $name) = $.value.split(/':'/);
+                            if $name === '*' && $key.contains(':') {
+                                my ($attr-ns, $attr-name) = $key.split(/':'/);
+                                $take = $attr-ns eq $ns;
+                            } else {
+                                # this includes namespace
+                                $take = $.value eq $key;
+                            }
+                        } else {
+                            $take = $.value eq $key;
                         }
+                        $result.push($val) if $take;
                     }
                 }
             }
@@ -154,8 +167,6 @@ class XML::XPath::NodeTest {
             when 'node' {
                 if $.value ~~ Str:U {
                     $take = True;
-                } elsif $.value eq '*' {
-                    $take = $node ~~ XML::Element;
                 } else {
                     if $node ~~ XML::Element {
                         if $.value.contains(':') {
@@ -165,12 +176,26 @@ class XML::XPath::NodeTest {
                             if %*NAMESPACES{ $ns }:exists {
                                 my ($uri, $node-name) = namespace-infos($node);
                                 $take = $uri eq %*NAMESPACES{ $ns } && $node-name eq $name;
-                                say "Namespace $ns exists TAKE($take) node {$node.name}, $uri is $uri ";
+                                #say "Namespace $ns exists TAKE($take) node {$node.name}, $uri is $uri ";
+                            } else {
+                                #say "";
+                                #say "node name: ", $node.name;
+                                my ($node-ns, $node-name) = $node.name.split(/':'/);
+                                if $name === '*' {
+                                    $take = $node-ns eq $ns && defined $node-name;
+                                    #say "take=$take node-ns=$node-ns ns=$ns ", $node-name.perl;
+                                } else {
+                                    # === because it works with (Any) as well
+                                    $take = $node-ns === $ns && $name === $node-name;
+                                    #say "take=$take -> node-ns=$node-ns ns=$ns - node-name=$node-name name=$name";
+                                }
+                            }
+                        } else {
+                            if $.value eq '*' {
+                                $take = True;
                             } else {
                                 $take = $node.name eq $.value;
                             }
-                        } else {
-                            $take = $node.name eq $.value;
                         }
                     }
                 }
