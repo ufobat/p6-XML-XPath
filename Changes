@@ -1,0 +1,4 @@
+Revision history for XML-XPath
+
+{{$NEXT}}
+    - Added GreaterEqual, SmallerEqual, NotEqual and Multiply operators (taboege++)
