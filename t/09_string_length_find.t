@@ -29,15 +29,12 @@ ENDXML
 $set = $x.find('/doc/text()');
 is $set.elems, 2, 'found 2 text nodes';
 
-# XML trimms the nodes, thats why the $set[0].Str is not giving the right result
 is $set[0].text, "\n  ", 'first text is correct';
 is $set[1].text, "\n", 'first text is correct';
 
-
-
 $set = $x.find('string-length( /doc/text() )');
 is $set.elems, 2, 'found 2 text nodes';
-is $set[0], 1, 'XML trimmed string length is 1';
+is $set[0], 3, 'XML trimmed string length is 3';
 is $set[1], 1, 'XML trimmed string length is 1';
 
 $set = $x.find('/doc/para/text()');
