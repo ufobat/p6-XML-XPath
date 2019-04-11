@@ -1,6 +1,7 @@
 Revision history for XML-XPath
 
 {{$NEXT}}
+    - Updated the dependency to XML to be at least version 0.1.0
 
 0.9.3  2019-03-22T17:21:30+01:00
     - Adapted testcases to XML::Node which does no longer trim on `.Str`

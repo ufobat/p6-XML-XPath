@@ -4,7 +4,7 @@
   ],
   "build-depends" : [ ],
   "depends" : [
-    "XML",
+    "XML:ver<0.1.0+>",
     "Test::META"
   ],
   "description" : "XPath perl6 library",
